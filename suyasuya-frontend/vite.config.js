@@ -35,7 +35,7 @@ export default defineConfig(({ command, mode }) => {
     },
     plugins: [
       vue(),
-      vueDevTools(),
+      // vueDevTools(),
       AutoImport({
         // 自动导入 ElementPlus 相关 API (比如：ElMessage, ElButton 等)
         resolvers: [

@@ -413,8 +413,8 @@ onMounted(() => {
                                     </a>
                                 </h3>
                                 <div class="upname">
-                                    <a :href="`/space/${video.autherId}`" class="author" target="_blank">
-                                        {{ video.autherName }}
+                                    <a :href="`/space/${video.authorId}`" class="author" target="_blank">
+                                        {{ video.authorName }}
                                     </a>
                                 </div>
                                 <div class="playInfo">

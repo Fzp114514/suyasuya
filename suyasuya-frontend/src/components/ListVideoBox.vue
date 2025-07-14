@@ -1,5 +1,5 @@
 <script setup>
-import { formatVideoDuration } from '@/main';
+import { formatVideoDuration, getBaseUrl } from '@/main';
 
 const props = defineProps({
     videosMsg: Object
@@ -10,7 +10,7 @@ const props = defineProps({
     <div class="videoBox" v-for="video in videosMsg" :key="video.videoId">
         <a :href="`/video/${video.videoId}`" target="_blank">
             <div class="cover" :title="video.title">
-                <img :src="`http://localhost:8080/cover/${video.cover}`" alt="">
+                <img :src="`${getBaseUrl()}/cover/${video.cover}`" alt="">
                 <div class="length">{{ formatVideoDuration(video.duration) }}</div>
             </div>
         </a>

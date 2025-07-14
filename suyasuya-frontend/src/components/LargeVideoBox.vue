@@ -1,5 +1,5 @@
 <script setup>
-import { formatUploadTime, formatVideoDuration, formatViewCounts } from '@/main';
+import { formatUploadTime, formatVideoDuration, formatViewCounts, getBaseUrl } from '@/main';
 
 // 要渲染的视频数据，通过父组件传值获得
 const props = defineProps({
@@ -24,7 +24,7 @@ const props = defineProps({
     <div class="videoBox" v-for="video in videosMsg" :key="video.videoId">
         <a :href="`/video/${video.videoId}`" target="_blank">
             <div class="videoCover">
-                <img class="pic" :src="`http://localhost:8080/cover/${video.cover}`" :title="video.title">
+                <img class="pic" :src="`${getBaseUrl()}/cover/${video.cover}`" :title="video.title">
                 <div class="mask" :title="video.title">
                     <div class="info">
                         <div class="viewCounts">
