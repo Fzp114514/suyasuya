@@ -1,0 +1,83 @@
+a {
+    color: #222222;
+}
+
+a:hover {
+    color: #00aeec;
+    transition: color 0.3s ease;
+}
+
+.videoBox {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.videoBox a {
+    width: 280px;
+    height: 180px;
+    margin-right: 20px;
+}
+
+.videoBox .cover {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.videoBox .cover img {
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+}
+
+.videoBox .cover .length {
+    position: absolute;
+    right: 5px;
+    bottom: 7px;
+    padding: 3px 6px;
+    background: rgba(0, 0, 0, .5);
+    color: rgb(255, 255, 255);
+    font-size: 12px;
+    border-top-left-radius: 5px;
+}
+
+.videoBox .info {
+    width: 650px;
+}
+
+.videoBox .info .title {
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
+}
+
+.videoBox .info .meta {
+    display: flex;
+    margin-bottom: 15px;
+    color: #6d757a;
+    font-size: 13px;
+}
+
+.videoBox .info .meta .viewCounts {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.videoBox .info .meta .viewCounts .icon {
+    display: flex;
+    margin-right: 3px;
+}
+
+.videoBox .info .desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+
+    color: #99a2aa;
+    font-size: 14px;
+}

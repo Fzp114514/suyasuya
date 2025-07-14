@@ -1,0 +1,315 @@
+.video-player {
+    position: relative;
+    width: 100%;
+    box-shadow: 0 0 8px var(--bpx-box-shadow, #e5e9ef);
+}
+
+/* 音量提示组件样式 */
+.videoContainer .volume-prompt-message {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    background: hsla(0, 0%, 100%, .8);
+    border-radius: 4px;
+}
+
+.volume-prompt-message .volume-prompt-icon {
+    width: 34px;
+    height: 34px;
+}
+
+.btn-volume-prompt-message {
+    background: url(../../imgs/icon/volume-prompt-msg.svg);
+    background-size: cover;
+}
+
+.volume-prompt-message .volume-prompt-text {
+    padding: 0 2px;
+    line-height: 34px;
+    /* color: #000; */
+    font-size: 20px;
+}
+
+/* 视频组件 */
+
+.video-player video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/* 过渡组件样式 */
+.fade-enter-active,
+.fade-leave-active {
+    transition: transform 0.3s ease;
+    transition: opacity 0.3s ease;
+}
+
+.fade-enter,
+.fade-leave-to {
+    opacity: 0;
+}
+
+.video-player .videoContainer {
+    position: relative;
+}
+
+.video-player .videoContainer .control-bar-top {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding-top: 30px;
+    z-index: 1;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+.video-player .videoContainer:fullscreen .control-bar-top {
+    padding-top: 40px;
+}
+
+/* 进度条样式 */
+
+.videoContainer .control-bar-top .container {
+    position: relative;
+    width: 100%;
+    height: 14px;
+}
+
+.videoContainer .control-bar-top .progress-bar-wrap {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 11px;
+    padding: 4px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.progress-bar-wrap .progress-bar {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, .5);
+
+}
+
+.video-player .videoContainer .control-bar-top .progress-bar-wrap:hover {
+    height: 14px;
+}
+
+.progress-bar .loaded-progress,
+.progress-bar .current-progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 100%;
+}
+
+.progress-bar .loaded-progress {
+    background: rgba(255, 255, 255, .7);
+}
+
+.progress-bar .current-progress {
+    background: #00aeec;
+}
+
+.progress-bar .current-progress .indicator {
+    position: absolute;
+    right: -7px;
+    bottom: -4px;
+    width: 14px;
+    height: 14px;
+    background: #00aeec;
+    border: 2px solid rgb(255, 255, 255);
+    border-radius: 50%;
+}
+
+.indicator-enter-active,
+.indicator-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.indicator-enter,
+.indicator-leave-to {
+    opacity: 0;
+}
+
+/* ============= control-content ================= */
+
+.videoContainer .control-bar-top .control-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+}
+
+.videoContainer:fullscreen .control-bar-top .control-content {
+    height: 60px;
+}
+
+.control-content .box-left,
+.control-content .box-right {
+    display: flex;
+}
+
+.control-content .box-left {
+    margin-left: 5px;
+}
+
+.control-content .box-right {
+    margin-right: 5px;
+}
+
+.control-content .box-center {
+    display: none;
+}
+
+.videoContainer:fullscreen .control-bar-top .control-content .box-center {
+    display: flex;
+    align-items: center;
+}
+
+.danmaku-switch {
+    display: flex;
+    justify-content: center;
+    width: 50px;
+}
+
+.danmaku-setting {
+    display: flex;
+    justify-content: center;
+    width: 40px;
+}
+
+.danmaku-setting .icon {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    background: url(../../imgs/icon/danmakuSetting.svg) no-repeat center;
+}
+
+.danmaku-inputbar {
+    display: flex;
+    width: 430px;
+    height: 26px;
+    padding: 0 10px;
+    background: rgba(241, 242, 243);
+    border-radius: 5px;
+}
+
+.danmaku-inputbar .danmaku-input {
+    width: 100%;
+    border: 0;
+    background: transparent;
+}
+
+.send-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70px;
+    height: 26px;
+    margin-left: 15px;
+    background: #00aeec;
+    color: rgb(255, 255, 255);
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.box-center .danmaku-inputbar {
+    background: rgba(245, 245, 245, .4);
+}
+
+.box-center .danmaku-inputbar .danmaku-input {
+    color: rgb(255, 255, 255);
+}
+
+.box-center .danmaku-inputbar .danmaku-input::placeholder {
+    color: rgb(171, 171, 171);
+}
+
+.control-btn {
+    display: flex;
+    justify-content: center;
+    width: 40px;
+    height: 20px;
+    color: rgb(255, 255, 255);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.control-btn .btn-span {
+    width: 22px;
+    height: 100%;
+}
+
+.btn-play {
+    background: url(../../imgs/icon/videoPlay.svg) no-repeat center;
+    background-size: cover;
+}
+
+.btn-pause {
+    background: url(../../imgs/icon/videoPause.svg) no-repeat center;
+    background-size: cover;
+}
+
+.video-player .control-bar-top .time-label {
+    display: flex;
+    align-items: center;
+    margin: 0 10px;
+    font-size: 12px;
+    color: rgb(255, 255, 255);
+}
+
+.time-label .divide {
+    margin: 0 5px;
+}
+
+.speed {
+    width: 50px;
+}
+
+.btn-volume {
+    background: url(../../imgs/icon/volume.svg) no-repeat center;
+    background-size: cover;
+}
+
+.btn-volume-mute {
+    background: url(../../imgs/icon/volume-mute.svg) no-repeat center;
+    background-size: cover;
+}
+
+.btn-setting {
+    background: url(../../imgs/icon/setting.svg) no-repeat center;
+}
+
+.btn-fullscreen {
+    background: url(../../imgs/icon/fullScreen.svg) no-repeat center;
+    background-size: cover;
+}
+
+/* =========== control-bar-bottom ================ */
+
+.video-player .control-bar-bottom {
+    display: flex;
+    align-items: center;
+    height: 40px;
+}
+
+.video-player .control-bar-bottom .player-video-info {
+    display: flex;
+    width: 180px;
+    padding-left: 15px;
+    color: #6a666d;
+    font-size: 12px;
+}

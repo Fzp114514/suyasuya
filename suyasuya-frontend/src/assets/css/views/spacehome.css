@@ -1,0 +1,239 @@
+.space-home-bg {
+    display: flex;
+    background: rgb(244, 245, 247);
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 8px;
+    border: 1px solid #6d757a;
+    border-radius: 4px;
+    color: #6d757a;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    color: #00aeec;
+    border: 1px solid #00aeec;
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.sidebar {
+    width: 100%;
+    margin-left: 10px;
+}
+
+.content {
+    padding: 15px 20px;
+    background: rgb(255, 255, 255);
+}
+
+.content .channel-item {
+    width: 950px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #eee;
+}
+
+.channel-item .channel-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    font-size: 22px;
+    font-weight: normal;
+}
+
+.channel-item .videos {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.sidebar .sidebar-item {
+    width: 220px;
+    /* height: 250px; */
+    padding: 0 10px;
+    margin-bottom: 10px;
+    background: rgb(255, 255, 255);
+}
+
+.sidebar .sidebar-item .title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 45px;
+    line-height: 45px;
+    margin: 0 10px;
+    border-bottom: 1px solid #e5e9ef;
+    font-size: 14px;
+}
+
+.sidebar .sidebar-item .ann {
+    position: relative;
+}
+
+.ann .input-content,
+.ann .content {
+    width: 100%;
+    height: 185px;
+    padding: 10px 10px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+    color: #222222;
+    font-size: 13px;
+    outline: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* 添加渐变边框过渡 */
+    transition: border-image 0.3s ease;
+}
+
+.input-content::placeholder {
+    font-size: 13px;
+}
+
+.input-content:hover {
+    border: 1px solid #00aeec;
+    border-radius: 3px;
+    transition: border-color 0.3s ease;
+}
+
+.input-content:focus {
+    border: 1px solid #00aeec;
+    border-radius: 3px;
+}
+
+.input-word-counter {
+    position: absolute;
+    right: 10px;
+    bottom: 20px;
+    color: #99a2aa;
+    font-size: 10px;
+}
+
+.sidebar .sidebar-item .user-info {
+    display: flex;
+    /* flex-direction: column; */
+    flex-wrap: wrap;
+    width: 100%;
+    padding: 10px;
+    color: #6d757a;
+    font-size: 12px;
+}
+
+.sidebar-item .user-info .user-info-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    height: 30px;
+}
+
+.user-info .user-info-item .info-command {
+    margin-right: 6px;
+    color: #9499a0;
+}
+
+.user-info .user-info-item .info-value {
+    color: #6d757a;
+}
+
+.logout-btn {
+    margin-top: 20px;
+    padding: 5px 0;
+    width: 100%;
+    background: #fff;
+    color: #6d757a;
+    font-size: 12px;
+    text-align: center;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .14);
+    transition: background-color .2s ease;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background: #e5e9ef;
+    color: #00a1d6;
+}
+
+/* 具名作用域插槽样式 */
+
+.videoInfo {
+    width: 100%;
+    height: 100%;
+    margin-left: 10px;
+}
+
+.videoInfo .title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+
+    margin-bottom: 8px;
+    color: #222222;
+    font-size: 15px;
+    font-weight: normal;
+}
+
+.videoInfo .upname {
+    display: flex;
+    width: 100%;
+    height: 20px;
+}
+
+.videoInfo .upname .author {
+    width: 100%;
+    color: #9499a0;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.videoInfo .upname .author:hover {
+    color: #00aeec;
+    transition: color 0.3s ease;
+}
+
+.videoInfo .playInfo {
+    display: flex;
+}
+
+.videoInfo .playInfo {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-top: 5px;
+    font-size: 13px;
+    color: #999999;
+}
+
+.viewCounts {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.icon {
+    display: flex;
+    margin-right: 3px;
+}
+
+.select-btn {
+    /* border: none; */
+    width: 80px;
+    height: 30px;
+    border: none;
+    background: #00a1d6;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color .1s ease;
+}
+
+.select-btn:hover {
+    background-color: #00b3e5;
+}

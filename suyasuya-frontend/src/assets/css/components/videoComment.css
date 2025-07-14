@@ -1,0 +1,97 @@
+/* ==================视频评论样式=================== */
+.avatar a:hover {
+    border-bottom: none;
+}
+
+.avatar img {
+    width: 48px;
+    height: 48px;
+    border-radius: 24px;
+}
+
+.icon {
+    display: flex;
+    margin-right: 3px;
+}
+
+.comment {
+    display: flex;
+    margin-top: 22px;
+}
+
+.comment .avatar {
+    padding-right: 10px;
+}
+
+.comment .main {
+    width: 100%;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e3e5e7;
+}
+
+.comment .main .nickName {
+    width: 100%;
+    height: 30px;
+    margin-bottom: 4px;
+    color: #333333;
+    font-size: 14px;
+}
+
+.comment .main .content {
+    width: 100%;
+    color: #18191c;
+    font-size: 16px;
+}
+
+.comment-action {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.comment-action .pubdate,
+.comment-action .comment-btn {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+    color: #9499a0;
+    font-size: 13px;
+}
+
+.comment-action .comment-btn {
+    cursor: pointer;
+}
+
+.comment-action .comment-btn:hover {
+    color: #00aeec;
+}
+
+.comment-btn .icon {
+    width: 13px;
+    height: 13px;
+}
+
+.comment-btn .like {
+    background: url(../../imgs/icon/like-small-default.svg) no-repeat center;
+    background-size: cover;
+}
+
+.comment-btn:hover .like {
+    background: url(../../imgs/icon/like-small-selected.svg) no-repeat center;
+    background-size: cover;
+}
+
+.comment-btn .islike {
+    background: url(../../imgs/icon/like-small-selected.svg) no-repeat center;
+    background-size: cover;
+}
+
+.comment-btn .reply {
+    background: url(../../imgs/icon/reply.svg) no-repeat center;
+    background-size: cover;
+}
+
+.comment-btn:hover .reply {
+    background: url(../../imgs/icon/reply-selected.svg) no-repeat center;
+    background-size: cover;
+}

@@ -1,0 +1,232 @@
+.space-favourites-bg {
+    display: flex;
+}
+
+.fav-sidenav {
+    width: 210px;
+    color: #222;
+    font-size: 14px;
+    border-right: 1px solid #eee;
+    /* background: pink; */
+}
+
+.fav-sidenav .nav-container {
+    border-bottom: 1px solid #eee;
+}
+
+.fav-sidenav .nav-container .favList-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 54px;
+    padding: 0 11px 0 19px;
+    line-height: 54px;
+    color: #99a2aa;
+    font-size: 14px;
+    cursor: pointer;
+    /* 为旋转添加过渡动画 */
+}
+
+.fav-sidenav .nav-container .favList-title .el-icon {
+    transition: transform 0.3s ease;
+}
+
+.fav-sidenav .nav-container .favList-title .rotate-icon {
+    transform: rotate(-180deg);
+}
+
+.fav-sidenav .nav-container .favList-container {
+    max-height: 420px;
+    margin-bottom: 10px;
+    /* 超出部分显示滚动条 */
+    overflow-y: auto;
+}
+
+.favList-container .item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 44px;
+    padding-left: 20px;
+    cursor: pointer;
+}
+
+.favList-container .item .el-icon {
+    width: 30px;
+    height: 30px;
+}
+
+
+.favList-container .item .text {
+    width: 111px;
+    margin: 0 10px 0 5px;
+    overflow: hidden;
+}
+
+.favList-container .item .num {
+    display: inline-block;
+    width: 20px;
+    text-align: center;
+    color: #99a2aa;
+    font-size: 12px;
+}
+
+.favList-container .active {
+    background: #00a1d6;
+    color: #fff;
+}
+
+.favList-container .active .num {
+    color: #fff;
+}
+
+.favList-container .item .collection-edit-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+}
+
+.favList-container .item .collection-edit-btn .icon {
+    display: block;
+    width: 10px;
+    height: 13px;
+    background: url(../../imgs/icon/more.svg) no-repeat center;
+    background-size: cover;
+}
+
+.favList-container .item .edit-panel {
+    z-index: 1;
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background: #fff;
+    border: 1px solid #e5e9ef;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .14);
+}
+
+/* 创建收藏夹弹窗样式 */
+
+.el-dialog {
+    padding: 0 23px;
+}
+
+.el-dialog .content .item {
+    position: relative;
+    margin-top: 16px;
+}
+
+.el-dialog .content .item .label {
+    color: rgba(0, 0, 0, .85);
+    font-size: 14px;
+    line-height: 24px;
+}
+
+.el-dialog .content .item .collection-name {
+    margin-top: 8px;
+    width: 374px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 14px;
+    padding: 0 12px;
+    border-radius: 2px;
+    border: 1px solid #ccd0d7;
+    cursor: auto;
+}
+
+.el-dialog .content .item .collection-description {
+    width: 374px;
+    height: 138px;
+    border: 1px solid #ccd0d7;
+    border-radius: 2px;
+    font-size: 14px;
+    line-height: 22px;
+    padding: 5px 12px 24px;
+    margin-top: 8px;
+    overflow: auto;
+    resize: none;
+}
+
+.el-dialog .content .item .num-limit {
+    position: absolute;
+    right: 12px;
+    bottom: 7px;
+    font-size: 12px;
+    color: #99a2aa;
+}
+
+/* 右侧主体样式 */
+
+.fav-main {
+    width: 1000px;
+}
+
+.fav-main .videos {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 20px 15px;
+}
+
+/* ========= 插槽样式-收藏夹 ========== */
+
+.fav-main .videos .video-info {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.fav-main .videos .video-info .edit-panel {
+    z-index: 1;
+    position: absolute;
+    right: -20px;
+    top: 20px;
+    background: #fff;
+    border: 1px solid #e5e9ef;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .14);
+}
+
+.edit-panel .edit-panel-item {
+    padding: 0 20px;
+    height: 40px;
+    line-height: 40px;
+    color: #222;
+    font-size: 14px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: background-color .2s ease;
+    cursor: pointer;
+}
+
+.edit-panel .edit-panel-item:hover {
+    background: #e5e9ef;
+    color: #00a1d6;
+}
+
+.fav-main .videos .wrap {
+    display: flex;
+    align-items: center;
+}
+
+.collection-video-edit-btn {
+    width: 20px;
+    cursor: pointer;
+}
+
+.collection-video-edit-btn .icon {
+    float: right;
+    width: 10px;
+    height: 13px;
+    background: url(../../imgs/icon/more.svg) no-repeat center;
+    background-size: cover;
+}
+
+.fav-main .papination {
+    display: flex;
+    justify-content: center;
+}

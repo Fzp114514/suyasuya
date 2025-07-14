@@ -1,0 +1,72 @@
+.userInfo-setting {
+    padding: 20px 20px 0;
+}
+
+.userInfo-item {
+    display: flex;
+    margin-bottom: 22px;
+}
+
+.userInfo-item .label {
+    width: 95px;
+    margin-right: 20px;
+    text-align: right;
+    line-height: 30px;
+    color: #717171;
+    font-size: 14px;
+    cursor: default;
+}
+
+.userInfo-item .inp {
+    width: 225px;
+    padding: 0 15px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    color: #606266;
+    font-size: 14px;
+    transition: border-color .2s;
+}
+
+.userInfo-item .inp:hover {
+    border-color: #c0c4cc;
+}
+
+.userInfo-item .inp:focus {
+    border-color: #409eff;
+}
+
+.userInfo-item .username {
+    height: 30px;
+}
+
+.userInfo-item .signature {
+    width: 618px;
+    height: 88px;
+    padding: 5px 15px;
+}
+
+.userInfo-setting .padding-dom {
+    width: 100%;
+    height: 60px;
+    margin-bottom: 40px;
+    border-bottom: 1px solid #e5e9ef;
+}
+
+.userInfo-save-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 110px;
+    height: 40px;
+    margin: 0 auto;
+    background: #00a1d6;
+    color: #fff;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color .1s ease;
+}
+
+.userInfo-save-btn:hover {
+    background: #00b3e5;
+}
