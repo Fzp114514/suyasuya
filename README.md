@@ -8,21 +8,21 @@
 
 ## 项目预览
 
-![网站注册页](preview-imgs\login.png)
+![网站注册页](preview-imgs/login.png)
 
-![网站首页](preview-imgs\home.png)
+![网站首页](preview-imgs/home.png)
 
-![视频播放页](preview-imgs\videoPlay.png)
+![视频播放页](preview-imgs/videoPlay.png)
 
-![用户主页1](preview-imgs\space.png)
+![用户主页1](preview-imgs/space.png)
 
-![用户视频页1](preview-imgs\video1.png)
+![用户视频页1](preview-imgs/video1.png)
 
-![用户视频页2](preview-imgs\video2.png)
+![用户视频页2](preview-imgs/video2.png)
 
-![用户收藏页](D:\web\suyasuya\preview-imgs\collections.png)
+![用户收藏页](preview-imgs/collections.png)
 
-![视频投稿页](preview-imgs\upload.png)
+![视频投稿页](preview-imgs/upload.png)
 
 
 
