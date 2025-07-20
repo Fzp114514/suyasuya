@@ -8,21 +8,21 @@
 
 ## 项目预览
 
-![网站注册页](preview-imgs\login.png)
+![网站注册页](preview-imgs/login.png)
 
-![网站首页](preview-imgs\home.png)
+![网站首页](preview-imgs/home.png)
 
-![视频播放页](preview-imgs\videoPlay.png)
+![视频播放页](preview-imgs/videoPlay.png)
 
-![用户主页1](preview-imgs\space.png)
+![用户主页1](preview-imgs/space.png)
 
-![用户视频页1](preview-imgs\video1.png)
+![用户视频页1](preview-imgs/video1.png)
 
-![用户视频页2](preview-imgs\video2.png)
+![用户视频页2](preview-imgs/video2.png)
 
-![用户收藏页](D:\web\suyasuya\preview-imgs\collections.png)
+![用户收藏页](preview-imgs/collections.png)
 
-![视频投稿页](preview-imgs\upload.png)
+![视频投稿页](preview-imgs/upload.png)
 
 
 
@@ -44,7 +44,7 @@
 2. **个人信息管理**：提供了个人相关信息的CRUD方法。
 3. **视频浏览**：主页会随机推荐网站视频，也可进入相应的视频分类页浏览分类视频。
 4. **视频搜索**：可在搜索框中输入关键词进行视频搜索，支持搜索的内容有：视频标题、视频标签、视频作者等。其中，视频标题支持模糊查询。系统会保留用户的搜索关键词，用户可通过搜索栏下方的搜索历史管理搜索关键词。
-5. **视频播放**：用户可通过系统设定的快捷键控制视频播放，如：空格 => 视频播放或暂停播放，F => 全屏或取消全屏 D => 开启或关闭弹幕 ArrowLeft、ArrowRight => 视频播放音量控制。
+5. **视频播放**：用户可通过点击进入视频播放页，在播放页中，可通过系统设定的快捷键控制视频播放，目前设置的快捷键有：空格 => 视频播放或暂停播放，F => 全屏或取消全屏 D => 开启或关闭弹幕 ArrowLeft、ArrowRight => 视频播放进度控制（+-5s），ArrowUp、ArrowDown => 视频播放音量控制(+-10%)。
 6. **视频投稿**：采用分步上传方式，即用户先上传视频，然后边等待视频上传完成边填写相关表单，表单信息校验通过且视频上传完成后即可投稿。
 7. **历史记录**：系统会保存用户的视频观看记录，用户可以查看或删除历史记录。
 8. **视频收藏**：系统会自动给用户分配默认收藏夹，该收藏夹只能修改相关信息，不能被删除。用户也可以自行创建视频收藏夹并进行相关的CRUD，在视频播放页可以进行视频收藏。
