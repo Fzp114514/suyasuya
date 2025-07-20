@@ -25,12 +25,12 @@
 /* 设置登录模块样式 */
 .box {
     display: flex;
+    margin: 100px auto;
     overflow: hidden;
     width: 600px;
     height: 400px;
     background: rgba(255, 255, 255, .6);
     border-radius: 1.5rem;
-    margin: 100px auto;
     box-shadow: 0 0 1rem 0.2rem rgb(0 0 0 / 10%);
 }
 

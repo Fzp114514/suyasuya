@@ -1,6 +1,8 @@
 /* 封装axios用于发送请求 */
 import axios from 'axios'
+import { useLoadingStore } from '@/stores/loading'
 
+const loadingStore = useLoadingStore()
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
 const isDebug = import.meta.env.VITE_DEBUG_MODE
 
@@ -13,10 +15,15 @@ const request = axios.create({
 // 添加请求拦截器
 request.interceptors.request.use(function (config) {
   // 在发送请求之前做些什么
+
   const token = localStorage.getItem('token')
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}` // 确保格式正确
   }
+
+  // 开启loading动画，禁止背景点击（节流，防止多次无效触发）
+  loadingStore.show()
+
   return config
 }, function (error) {
   // 对请求错误做些什么
@@ -26,9 +33,11 @@ request.interceptors.request.use(function (config) {
 // 添加响应拦截器
 request.interceptors.response.use(function (response) {
   // 对响应数据做点什么(默认axios会多包装一层data，此处减少数据层级)
+  loadingStore.hide()
   return response.data
 }, function (error) {
   // 对响应错误做点什么
+  loadingStore.hide()
   return Promise.reject(error)
 })
 
