@@ -18,13 +18,13 @@ const userStore = useUserStore()
                 <li class="home">
                     <RouterLink to="/"><el-icon><i-ep-House /></el-icon>首页</RouterLink>
                 </li>
-                <li><a href="/study" target="_blank"><el-icon><i-ep-Reading /></el-icon>学习</a></li>
-                <li><a href="/game" target="_blank"><el-icon><i-ep-SwitchFilled /></el-icon>游戏</a></li>
+                <li><a href="/study" target="_self"><el-icon><i-ep-Reading /></el-icon>学习</a></li>
+                <li><a href="/game" target="_self"><el-icon><i-ep-SwitchFilled /></el-icon>游戏</a></li>
                 <li>
-                    <a href="/life" target="_blank"><el-icon><i-ep-MagicStick /></el-icon>生活</a>
+                    <a href="/life" target="_self"><el-icon><i-ep-MagicStick /></el-icon>生活</a>
                 </li>
-                <li><a href="/tittleTattle" target="_blank"><el-icon><i-ep-EditPen /></el-icon>杂谈</a></li>
-                <li><a href="/anime" target="_blank"><el-icon><i-ep-EditPen /></el-icon>动漫</a></li>
+                <li><a href="/tittleTattle" target="_self"><el-icon><i-ep-EditPen /></el-icon>杂谈</a></li>
+                <li><a href="/anime" target="_self"><el-icon><i-ep-EditPen /></el-icon>动漫</a></li>
             </ul>
             <SearchBox></SearchBox>
             <ul class="right">

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.UserMasterpieceMapper">
+
+    <!-- 使用 ON DUPLICATE KEY UPDATE 实现原子化更新 -->
+    <insert id="upsert">
+        INSERT INTO user_masterpieces (user_id, video_id)
+        VALUES (#{userId}, #{videoId})
+        ON DUPLICATE KEY UPDATE video_id = VALUES(video_id)
+    </insert>
+</mapper>

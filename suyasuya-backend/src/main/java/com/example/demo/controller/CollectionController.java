@@ -3,7 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.common.PageResult;
 import com.example.demo.common.Result;
 import com.example.demo.dto.CollectionUpdateRequest;
-import com.example.demo.entity.Collection;
+import com.example.demo.entity.UserCollection;
 import com.example.demo.service.CollectionService;
 import com.example.demo.vo.CollectedVideoVO;
 import com.example.demo.vo.CollectionVideoVO;
@@ -26,15 +26,15 @@ public class CollectionController {
 
     // 创建收藏夹接口
     @PostMapping("/create")
-    public Result<Collection> createCollection(@RequestAttribute Integer userId, // 从拦截器中获取的 userId
-                                               @RequestParam String collectionName,
-                                               @RequestParam(required = false) String description) {
+    public Result<UserCollection> createCollection(@RequestAttribute Integer userId, // 从拦截器中获取的 userId
+                                                   @RequestParam String collectionName,
+                                                   @RequestParam(required = false) String description) {
         try {
             // 调用服务方法创建收藏夹
-            Collection collection = collectionService.createCollection(userId, collectionName, description);
+            UserCollection userCollection = collectionService.createCollection(userId, collectionName, description);
 
             // 返回成功结果
-            return Result.success("创建收藏夹成功", collection);
+            return Result.success("创建收藏夹成功", userCollection);
         } catch (IllegalArgumentException e) {
             // 捕获业务异常并返回错误信息
             return Result.failure("已存在同名收藏夹");
@@ -51,13 +51,13 @@ public class CollectionController {
      * @return 包含所有收藏夹的响应
      */
     @GetMapping("/user")
-    public Result<List<Collection>> getUserCollections(@RequestAttribute Integer userId) {
+    public Result<List<UserCollection>> getUserCollections(@RequestAttribute Integer userId) {
         try {
             // 调用 service 方法获取用户的所有收藏夹
-            List<Collection> collections = collectionService.getUserCollections(userId);
+            List<UserCollection> userCollections = collectionService.getUserCollections(userId);
 
             // 返回成功的响应
-            return Result.success("获取用户收藏夹成功", collections);
+            return Result.success("获取用户收藏夹成功", userCollections);
         } catch (Exception e) {
             // 捕获异常，返回失败的响应
             return Result.failure("获取用户收藏夹失败: " + e.getMessage());

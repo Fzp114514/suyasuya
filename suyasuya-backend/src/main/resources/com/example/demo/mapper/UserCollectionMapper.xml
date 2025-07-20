@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.UserCollectionMapper">
+
+    <!-- 更新视频数量 -->
+    <update id="updateVideoCount">
+        UPDATE user_collections
+        SET video_count = video_count + #{increment}
+        WHERE collection_id = #{collectionId}
+    </update>
+
+    <!-- 通过用户ID和名称查询收藏夹 -->
+    <select id="selectByUserIdAndName" resultType="userCollection">
+        SELECT * FROM user_collections
+        WHERE user_id = #{userId}
+          AND collection_name = #{collectionName}
+    </select>
+</mapper>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.VideoCollectionMapper">
+
+    <!-- 查询用户对指定视频的收藏信息 -->
+    <select id="selectCollectionsByUserAndVideo"
+            resultType="userCollectionVO">
+        SELECT
+            c.collection_id AS collectionId,
+            c.collection_name AS collectionName,
+            c.is_default AS isDefault,
+            vc.collect_time AS collectTime
+        FROM user_collections c
+                 INNER JOIN video_collections vc
+                            ON c.collection_id = vc.collection_id
+        WHERE c.user_id = #{userId}
+          AND vc.video_id = #{videoId}
+        ORDER BY vc.collect_time DESC
+    </select>
+
+    <!-- 查询用户最近收藏的视频 -->
+    <select id="selectRecentCollectedVideos"
+            resultType="collectedVideoVO">
+        SELECT
+            v.video_id AS videoId,
+            v.title,
+            v.cover,
+            v.duration,
+            vc.collect_time AS collectTime
+        FROM video_collections vc
+                 INNER JOIN user_collections c
+                            ON vc.collection_id = c.collection_id
+                 INNER JOIN videos v
+                            ON vc.video_id = v.video_id
+        WHERE c.user_id = #{userId}
+        ORDER BY vc.collect_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 分页查询收藏夹中的视频 -->
+    <select id="selectVideosPage"
+            resultType="collectionVideoVO">
+        SELECT
+            v.video_id AS videoId,
+            v.title,
+            v.cover,
+            v.duration,
+            vc.collect_time AS collectTime
+        FROM video_collections vc
+                 INNER JOIN videos v
+                            ON vc.video_id = v.video_id
+        WHERE vc.collection_id = #{collectionId}
+        ORDER BY vc.collect_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 查询收藏夹中的视频数量 -->
+    <select id="selectVideoCount" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM video_collections
+        WHERE collection_id = #{collectionId}
+    </select>
+
+    <!-- 根据收藏夹ID删除所有关联视频 -->
+    <delete id="deleteByCollectionId">
+        DELETE FROM video_collections
+        WHERE collection_id = #{collectionId}
+    </delete>
+
+</mapper>

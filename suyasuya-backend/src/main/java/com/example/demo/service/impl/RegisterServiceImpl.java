@@ -2,9 +2,9 @@ package com.example.demo.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.dto.RegisterRequest;
-import com.example.demo.entity.Collection;
+import com.example.demo.entity.UserCollection;
 import com.example.demo.entity.User;
-import com.example.demo.mapper.CollectionMapper;
+import com.example.demo.mapper.UserCollectionMapper;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.service.RegisterService;
 import com.example.demo.service.UserInfoService;
@@ -22,7 +22,7 @@ public class RegisterServiceImpl extends ServiceImpl<UserMapper, User> implement
     @Autowired
     private UserInfoService userInfoService;
     @Autowired
-    private CollectionMapper collectionMapper; // 新增收藏夹Mapper
+    private UserCollectionMapper userCollectionMapper; // 新增收藏夹Mapper
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -48,13 +48,13 @@ public class RegisterServiceImpl extends ServiceImpl<UserMapper, User> implement
 
     // 创建默认收藏夹方法
     private void createDefaultCollection(Integer userId) {
-        Collection collection = new Collection();
-        collection.setUserId(userId);
-        collection.setCollectionName("默认收藏夹");
-        collection.setIsDefault(true); // 设置默认标识
-        collection.setCreateTime(new Date());
-        collection.setUpdateTime(new Date());
-        collection.setVideoCount(0);
-        collectionMapper.insert(collection);
+        UserCollection userCollection = new UserCollection();
+        userCollection.setUserId(userId);
+        userCollection.setCollectionName("默认收藏夹");
+        userCollection.setIsDefault(true); // 设置默认标识
+        userCollection.setCreateTime(new Date());
+        userCollection.setUpdateTime(new Date());
+        userCollection.setVideoCount(0);
+        userCollectionMapper.insert(userCollection);
     }
 }

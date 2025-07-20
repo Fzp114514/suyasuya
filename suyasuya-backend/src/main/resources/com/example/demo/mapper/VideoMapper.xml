@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.VideoMapper">
+
+    <!-- 根据用户ID更新作者名 -->
+    <update id="updateAuthorNameByUserId">
+        UPDATE videos
+        SET author_name = #{newAuthorName}
+        WHERE author_id = #{userId}
+    </update>
+
+    <!-- 检查用户名是否存在 -->
+    <select id="existsByUserName" resultType="boolean">
+        SELECT COUNT(*) FROM users WHERE user_name = #{userName}
+    </select>
+
+    <!-- 根据视频ID查询作者ID -->
+    <select id="selectAuthorIdByVideoId" resultType="java.lang.Integer">
+        SELECT author_id FROM videos WHERE video_id = #{videoId}
+    </select>
+
+    <!-- 增加视频观看数 -->
+    <update id="incrementViewCount">
+        UPDATE videos
+        SET view_count = view_count + 1
+        WHERE video_id = #{videoId}
+    </update>
+
+    <!-- 更新视频收藏数 -->
+    <update id="updateCollectionCount">
+        UPDATE videos
+        SET collection_count = collection_count + #{increment}
+        WHERE video_id = #{videoId}
+    </update>
+
+    <!-- 随机查询已发布视频 -->
+    <select id="selectRandomVideos" resultType="com.example.demo.vo.VideoSimpleVO">
+        SELECT
+            video_id AS videoId,
+            author_id AS authorId,
+            author_name AS authorName,
+            upload_time AS uploadTime,
+            title,
+            duration,
+            cover,
+            view_count AS viewCount
+        FROM videos
+        WHERE status = 'published'
+        ORDER BY RAND()
+        LIMIT #{count}
+    </select>
+
+    <!-- 按分类随机查询已发布视频 -->
+    <select id="selectRandomVideosByCategory" resultType="com.example.demo.vo.VideoSimpleVO">
+        SELECT
+            video_id AS videoId,
+            author_id AS authorId,
+            author_name AS authorName,
+            upload_time AS uploadTime,
+            title,
+            duration,
+            cover,
+            view_count AS viewCount
+        FROM videos
+        WHERE status = 'published'
+          AND category_id = #{categoryId}
+        ORDER BY RAND()
+        LIMIT #{count}
+    </select>
+
+    <!-- 统计已发布视频总数 -->
+    <select id="countPublishedVideos" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM videos WHERE status = 'published'
+    </select>
+
+    <!-- 统计分类下已发布视频数 -->
+    <select id="countPublishedVideosByCategory" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM videos
+        WHERE status = 'published'
+          AND category_id = #{categoryId}
+    </select>
+
+    <!-- 查询视频基本信息（排除status字段） -->
+    <select id="selectVideoWithoutStatus" resultType="video">
+        SELECT
+            video_id AS videoId,
+            video,
+            author_id AS authorId,
+            author_name AS authorName,
+            upload_time AS uploadTime,
+            title,
+            duration,
+            cover,
+            introduction,
+            category_id AS categoryId,
+            like_count AS likeCount,
+            view_count AS viewCount,
+            comment_count AS commentCount,
+            collection_count AS collectionCount
+        FROM videos
+        WHERE video_id = #{videoId}
+    </select>
+
+    <!-- 默认热门推荐视频 -->
+    <select id="selectHotVideos" resultType="recommendVideoVO">
+        SELECT
+            video_id AS videoId,
+            cover,
+            author_id AS authorId,
+            author_name AS authorName,
+            title,
+            duration,
+            upload_time AS uploadTime
+        FROM videos
+        WHERE status = 'published'
+        ORDER BY view_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 相关视频推荐（优化版） -->
+    <select id="selectRelatedRecommendVideos" resultType="recommendVideoVO">
+        SELECT
+        main.videoId,
+        main.cover,
+        main.authorId,
+        main.authorName,
+        main.uploadTime,
+        main.title,
+        main.duration,
+        main.viewCount,
+        COALESCE(tags.common_tag_count, 0) AS commonTagCount
+        FROM (
+        SELECT
+        video_id AS videoId,
+        cover,
+        author_id AS authorId,
+        author_name AS authorName,
+        upload_time AS uploadTime,
+        title,
+        duration,
+        view_count AS viewCount
+        FROM videos
+        WHERE status = 'published'
+        AND video_id != #{videoId}
+        ) main
+        LEFT JOIN (
+        SELECT
+        r.video_id,
+        COUNT(*) AS common_tag_count
+        FROM video_tag_relations r
+        INNER JOIN video_tags t ON r.tag_id = t.tag_id
+        <if test="tags != null and tags.size() > 0">
+            WHERE t.tag_name IN
+            <foreach item="tag" collection="tags" open="(" separator="," close=")">
+                #{tag}
+            </foreach>
+        </if>
+        GROUP BY r.video_id
+        ) tags ON main.videoId = tags.video_id
+        ORDER BY
+        <choose>
+            <when test="tags != null and tags.size() > 0">
+                commonTagCount DESC, main.viewCount DESC
+            </when>
+            <otherwise>
+                main.viewCount DESC
+            </otherwise>
+        </choose>
+        LIMIT #{limit}
+    </select>
+
+    <!-- 搜索已发布视频（动态SQL） -->
+    <select id="searchPublishedVideos" resultType="videoSearchVO">
+        SELECT
+        v.video_id AS videoId,
+        v.cover,
+        v.author_id AS authorId,
+        v.title,
+        v.author_name AS authorName,
+        v.upload_time AS uploadTime,
+        v.duration,
+        v.view_count AS viewCount,
+        v.collection_count AS collectionCount
+        FROM videos v
+        WHERE v.status = 'published'
+        AND v.video_id IN (
+        SELECT DISTINCT v2.video_id
+        FROM videos v2
+        LEFT JOIN video_tag_relations vr ON v2.video_id = vr.video_id
+        LEFT JOIN video_tags t ON vr.tag_id = t.tag_id
+        WHERE v2.title LIKE CONCAT('%', #{keyword}, '%')
+        OR v2.author_name LIKE CONCAT('%', #{keyword}, '%')
+        OR t.tag_name LIKE CONCAT('%', #{keyword}, '%')
+        )
+        ORDER BY
+        <choose>
+            <when test="sortField == 'view_count' or sortField == 'upload_time' or sortField == 'collection_count'">
+                v.${sortField} ${sortOrder}
+            </when>
+            <otherwise>
+                v.view_count DESC
+            </otherwise>
+        </choose>
+    </select>
+
+</mapper>

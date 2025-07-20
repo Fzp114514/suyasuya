@@ -7,6 +7,6 @@ import org.apache.ibatis.annotations.Select;
 
 @Mapper
 public interface VideoCategoryMapper extends BaseMapper<VideoCategory> {
-    @Select("SELECT EXISTS(SELECT 1 FROM video_categories WHERE category_id = #{categoryId})")
+
     boolean existsById(Integer categoryId);
 }

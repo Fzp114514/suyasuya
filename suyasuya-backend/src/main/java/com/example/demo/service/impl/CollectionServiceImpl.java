@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.common.PageResult;
-import com.example.demo.entity.Collection;
+import com.example.demo.entity.UserCollection;
 import com.example.demo.entity.VideoCollection;
-import com.example.demo.mapper.CollectionMapper;
+import com.example.demo.mapper.UserCollectionMapper;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.mapper.VideoCollectionMapper;
 import com.example.demo.mapper.VideoMapper;
@@ -25,7 +25,7 @@ import java.util.List;
 
 @Transactional
 @Service
-public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collection> implements CollectionService {
+public class CollectionServiceImpl extends ServiceImpl<UserCollectionMapper, UserCollection> implements CollectionService {
     // 定义收藏夹名称最大长度（与数据库字段一致）
     private static final int MAX_COLLECTION_NAME_LENGTH = 50;
     // 定义一次请求能获取的最多收藏记录
@@ -38,17 +38,17 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
     @Autowired
     private VideoMapper videoMapper;
     @Autowired
-    private CollectionMapper collectionMapper;
+    private UserCollectionMapper userCollectionMapper;
     @Autowired
     private VideoCollectionMapper videoCollectionMapper;
 
     @Transactional
     @Override
-    public Collection createCollection(Integer userId, String collectionName, String description) {
+    public UserCollection createCollection(Integer userId, String collectionName, String description) {
         // 参数基础校验
         validateParams(userId, collectionName);
-        Collection existingCollection = baseMapper.selectByUserIdAndName(userId, collectionName);
-        if (existingCollection != null) {
+        UserCollection existingUserCollection = baseMapper.selectByUserIdAndName(userId, collectionName);
+        if (existingUserCollection != null) {
             // 如果存在同名收藏夹，抛出异常或返回错误信息
             throw new IllegalArgumentException("已经存在同名的收藏夹！");
         }
@@ -57,22 +57,22 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
         String processedName = processCollectionName(collectionName);
 
         // 构建收藏夹实体
-        Collection collection = buildCollection(userId, processedName, description);
+        UserCollection userCollection = buildCollection(userId, processedName, description);
 
-        System.out.println((collection));
+        System.out.println((userCollection));
         // 持久化到数据库
-        baseMapper.insert(collection);
+        baseMapper.insert(userCollection);
 
-        return collection;
+        return userCollection;
     }
 
     @Override
-    public List<Collection> getUserCollections(Integer userId) {
+    public List<UserCollection> getUserCollections(Integer userId) {
         // 参数校验
         validateUserId(userId);
 
         // 构建查询条件
-        QueryWrapper<Collection> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<UserCollection> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId)
                 .orderByAsc("create_time"); // 按创建时间升序
 
@@ -95,11 +95,11 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
         }
 
         // 2. 验证收藏夹存在性
-        Collection collection = collectionMapper.selectById(collectionId);
-        if (collection == null) {
+        UserCollection userCollection = userCollectionMapper.selectById(collectionId);
+        if (userCollection == null) {
             throw new RuntimeException("收藏夹不存在");
         }
-        if (!userId.equals(collection.getUserId())) {
+        if (!userId.equals(userCollection.getUserId())) {
             throw new RuntimeException("无权操作他人收藏夹");
         }
 
@@ -137,7 +137,7 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
 
     private void updateCounters(Integer collectionId, Integer videoId) {
         // 更新收藏夹计数
-        int collectionUpdated = collectionMapper.updateVideoCount(collectionId, 1);
+        int collectionUpdated = userCollectionMapper.updateVideoCount(collectionId, 1);
         // 更新视频收藏计数
         int videoUpdated = videoMapper.updateCollectionCount(videoId, 1);
 
@@ -167,11 +167,11 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
         validateIds(userId, collectionId, videoId);
 
         // 验证收藏夹存在性
-        Collection collection = collectionMapper.selectById(collectionId);
-        if (collection == null) {
+        UserCollection userCollection = userCollectionMapper.selectById(collectionId);
+        if (userCollection == null) {
             throw new RuntimeException("收藏夹不存在");
         }
-        if (!userId.equals(collection.getUserId())) {
+        if (!userId.equals(userCollection.getUserId())) {
             throw new RuntimeException("无权操作他人收藏夹");
         }
 
@@ -197,7 +197,7 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
 
     private void updateCounters(Integer collectionId, Integer videoId, int delta) {
         // 更新收藏夹计数
-        int collectionUpdated = collectionMapper.updateVideoCount(collectionId, delta);
+        int collectionUpdated = userCollectionMapper.updateVideoCount(collectionId, delta);
         // 更新视频收藏计数
         int videoUpdated = videoMapper.updateCollectionCount(videoId, delta);
 
@@ -251,7 +251,7 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
         }
 
         // 查询收藏夹信息
-        Collection existing = collectionMapper.selectById(collectionId);
+        UserCollection existing = userCollectionMapper.selectById(collectionId);
         if (existing == null || !existing.getUserId().equals(userId)) {
             throw new IllegalArgumentException("收藏夹不存在或权限不足");
         }
@@ -273,7 +273,7 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
         }
 
         // 构建动态更新条件
-        UpdateWrapper<Collection> updateWrapper = new UpdateWrapper<>();
+        UpdateWrapper<UserCollection> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("collection_id", collectionId)
                 .eq("user_id", userId);
 
@@ -285,7 +285,7 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
         }
         updateWrapper.set("update_time", new Date());
 
-        int affectedRows = collectionMapper.update(null, updateWrapper);
+        int affectedRows = userCollectionMapper.update(null, updateWrapper);
         if (affectedRows == 0) {
             throw new RuntimeException("更新收藏夹失败");
         }
@@ -299,18 +299,18 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
         }
 
         // 查询收藏夹详细信息
-        Collection collection = collectionMapper.selectById(collectionId);
-        if (collection == null) {
+        UserCollection userCollection = userCollectionMapper.selectById(collectionId);
+        if (userCollection == null) {
             throw new IllegalArgumentException("收藏夹不存在");
         }
 
         // 权限校验：确保用户只能删除自己的收藏夹
-        if (!collection.getUserId().equals(userId)) {
+        if (!userCollection.getUserId().equals(userId)) {
             throw new IllegalArgumentException("无权删除该收藏夹");
         }
 
         // 默认收藏夹保护机制
-        if (collection.getIsDefault()) {
+        if (userCollection.getIsDefault()) {
             throw new IllegalArgumentException("默认收藏夹不可删除");
         }
 
@@ -318,7 +318,7 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
         videoCollectionMapper.deleteByCollectionId(collectionId);
 
         // 执行删除操作
-        int affectedRows = collectionMapper.deleteById(collectionId);
+        int affectedRows = userCollectionMapper.deleteById(collectionId);
         if (affectedRows == 0) {
             throw new RuntimeException("删除收藏夹失败，可能已被其他操作删除");
         }
@@ -339,8 +339,8 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
             throw new RuntimeException("无效收藏夹ID");
         }
 
-        Collection collection = collectionMapper.selectById(collectionId);
-        if (collection == null) {
+        UserCollection userCollection = userCollectionMapper.selectById(collectionId);
+        if (userCollection == null) {
             throw new RuntimeException("收藏夹不存在");
         }
     }
@@ -416,16 +416,16 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
         return trimmedName;
     }
 
-    private Collection buildCollection(Integer userId, String name, String description) {
-        Collection collection = new Collection();
-        collection.setUserId(userId);
-        collection.setCollectionName(name);
-        collection.setDescription(StringUtils.isNotBlank(description) ? description.trim() : null);
-        collection.setIsDefault(false);  // 明确设置为非默认收藏夹
-        collection.setCreateTime(new Date());
-        collection.setUpdateTime(new Date());
-        collection.setVideoCount(0); // 明确初始化视频数量
-        return collection;
+    private UserCollection buildCollection(Integer userId, String name, String description) {
+        UserCollection userCollection = new UserCollection();
+        userCollection.setUserId(userId);
+        userCollection.setCollectionName(name);
+        userCollection.setDescription(StringUtils.isNotBlank(description) ? description.trim() : null);
+        userCollection.setIsDefault(false);  // 明确设置为非默认收藏夹
+        userCollection.setCreateTime(new Date());
+        userCollection.setUpdateTime(new Date());
+        userCollection.setVideoCount(0); // 明确初始化视频数量
+        return userCollection;
     }
 
     private void validateIds(Integer userId, Integer collectionId, Integer videoId) {
@@ -441,7 +441,7 @@ public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collect
     }
 
     private void updateCollectionCount(Integer collectionId, int delta) {
-        int updated = collectionMapper.updateVideoCount(collectionId, delta);
+        int updated = userCollectionMapper.updateVideoCount(collectionId, delta);
         if (updated == 0) {
             log.error("收藏夹计数更新失败，collectionId: {}");
             throw new RuntimeException("系统错误：收藏夹计数更新失败");

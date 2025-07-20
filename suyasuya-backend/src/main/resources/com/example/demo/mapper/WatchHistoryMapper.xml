@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.WatchHistoryMapper">
+
+    <!-- 插入或更新观看历史 -->
+    <insert id="upsertWatchHistory">
+        INSERT INTO watch_history (user_id, video_id, watch_time)
+        VALUES (#{userId}, #{videoId}, #{watchTime})
+        ON DUPLICATE KEY UPDATE watch_time = #{watchTime}
+    </insert>
+
+    <!-- 检查视频是否存在 -->
+    <select id="videoExists" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM videos WHERE video_id = #{videoId})
+    </select>
+
+    <!-- 定义结果映射 -->
+    <resultMap id="watchHistoryVOMap" type="watchHistoryVO">
+        <result property="videoId" column="video_id"/>
+        <result property="cover" column="cover"/>
+        <result property="title" column="title"/>
+        <result property="authorId" column="author_id"/>
+        <result property="authorName" column="author_name"/>
+        <result property="watchTime" column="watch_time"/>
+        <result property="duration" column="duration"/>
+        <result property="viewCount" column="view_count"/>
+    </resultMap>
+
+    <!-- 分页查询观看历史 -->
+    <select id="selectHistoryPage" resultMap="watchHistoryVOMap">
+        SELECT
+            v.video_id,
+            v.cover,
+            v.title,
+            v.author_id,
+            u.user_name AS author_name,
+            wh.watch_time,
+            v.duration,
+            v.view_count
+        FROM watch_history wh
+                 LEFT JOIN videos v ON wh.video_id = v.video_id
+                 LEFT JOIN users u ON v.author_id = u.user_id
+        WHERE wh.user_id = #{userId}
+        ORDER BY wh.watch_time DESC
+    </select>
+
+</mapper>

@@ -2,10 +2,14 @@ package com.example.demo.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 
 // VideoCollection.java
+@Setter
+@Getter
 @TableName("video_collections")
 public class VideoCollection {
     @TableField("collection_id")
@@ -20,27 +24,4 @@ public class VideoCollection {
 
     // Getters and Setters...
 
-    public Integer getCollectionId() {
-        return collectionId;
-    }
-
-    public void setCollectionId(Integer collectionId) {
-        this.collectionId = collectionId;
-    }
-
-    public Integer getVideoId() {
-        return videoId;
-    }
-
-    public void setVideoId(Integer videoId) {
-        this.videoId = videoId;
-    }
-
-    public Date getCollectTime() {
-        return collectTime;
-    }
-
-    public void setCollectTime(Date collectTime) {
-        this.collectTime = collectTime;
-    }
 }
