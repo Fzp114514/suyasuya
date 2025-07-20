@@ -11,30 +11,11 @@
  Target Server Version : 50725
  File Encoding         : 65001
 
- Date: 15/07/2025 01:11:24
+ Date: 20/07/2025 23:12:41
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
-
--- ----------------------------
--- Table structure for collections
--- ----------------------------
-DROP TABLE IF EXISTS `collections`;
-CREATE TABLE `collections`  (
-  `collection_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `collection_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `description` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
-  `create_time` datetime(0) NOT NULL,
-  `update_time` datetime(0) NULL DEFAULT NULL,
-  `is_default` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否为默认收藏夹（0-否 1-是）',
-  `video_count` int(11) NOT NULL DEFAULT 0 COMMENT '收藏夹内视频数量',
-  PRIMARY KEY (`collection_id`) USING BTREE,
-  INDEX `idx_collection_user`(`user_id`) USING BTREE,
-  INDEX `idx_user`(`user_id`) USING BTREE,
-  INDEX `idx_user_id`(`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for comment_likes
@@ -99,7 +80,7 @@ CREATE TABLE `search_history`  (
   PRIMARY KEY (`search_id`) USING BTREE,
   INDEX `user_id`(`user_id`) USING BTREE,
   CONSTRAINT `search_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 78 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 82 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for system_announcements
@@ -114,6 +95,25 @@ CREATE TABLE `system_announcements`  (
   INDEX `publisher_id`(`publisher_id`) USING BTREE,
   CONSTRAINT `system_announcements_ibfk_1` FOREIGN KEY (`publisher_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for user_collections
+-- ----------------------------
+DROP TABLE IF EXISTS `user_collections`;
+CREATE TABLE `user_collections`  (
+  `collection_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `collection_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `description` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
+  `create_time` datetime(0) NOT NULL,
+  `update_time` datetime(0) NULL DEFAULT NULL,
+  `is_default` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否为默认收藏夹（0-否 1-是）',
+  `video_count` int(11) NOT NULL DEFAULT 0 COMMENT '收藏夹内视频数量',
+  PRIMARY KEY (`collection_id`) USING BTREE,
+  INDEX `idx_collection_user`(`user_id`) USING BTREE,
+  INDEX `idx_user`(`user_id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user_masterpieces
@@ -174,7 +174,7 @@ CREATE TABLE `video_collections`  (
   UNIQUE INDEX `uk_collection_video`(`collection_id`, `video_id`) USING BTREE,
   INDEX `idx_video_user`(`video_id`, `collection_id`) USING BTREE,
   INDEX `idx_collect_time`(`collect_time`) USING BTREE,
-  CONSTRAINT `video_collections_ibfk_1` FOREIGN KEY (`collection_id`) REFERENCES `collections` (`collection_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `video_collections_ibfk_1` FOREIGN KEY (`collection_id`) REFERENCES `user_collections` (`collection_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `video_collections_ibfk_2` FOREIGN KEY (`video_id`) REFERENCES `videos` (`video_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -264,6 +264,6 @@ CREATE TABLE `watch_history`  (
   INDEX `video_id`(`video_id`) USING BTREE,
   CONSTRAINT `watch_history_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `watch_history_ibfk_2` FOREIGN KEY (`video_id`) REFERENCES `videos` (`video_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 417 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 464 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;
