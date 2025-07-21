@@ -35,7 +35,6 @@ export default defineConfig(({ command, mode }) => {
     },
     plugins: [
       vue(),
-      // vueDevTools(),
       AutoImport({
         // 自动导入 ElementPlus 相关 API (比如：ElMessage, ElButton 等)
         resolvers: [
@@ -63,5 +62,23 @@ export default defineConfig(({ command, mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       },
     },
+
+    minify: env.VITE_DEBUG_MODE === 'true' ? false : 'terser', // 生产环境开启压缩
+    cssMinify: env.VITE_DEBUG_MODE === 'true' ? false : 'terser', // 生产环境开启压缩
+    terserOptions: {
+      compress: {
+        drop_console: true,       // 移除 console.log 语句
+        drop_debugger: true,      // 移除 debugger 语句
+        passes: 2                 // 执行2轮压缩优化
+      },
+      mangle: {
+        toplevel: true,           // 启用顶层变量和函数名混淆
+      },
+      format: {
+        comments: false           // 移除注释
+      }
+    },
+    // 关闭chunk大小警告
+    chunkSizeWarningLimit: 2000
   }
 })
