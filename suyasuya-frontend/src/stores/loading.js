@@ -28,7 +28,6 @@ export const useLoadingStore = defineStore('loading', () => {
             const elapsedTime = Date.now() - showTime   // 计算已显示时间
             // 如果已显示时间小于最小显示时间，则延迟隐藏
             const remaining = minShowTime - elapsedTime
-            console.log(elapsedTime, remaining)
             if (remaining <= 0) {
                 isLoading.value = false
             }

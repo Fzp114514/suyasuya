@@ -1,6 +1,8 @@
 package com.example.demo.filter;
 
 import com.example.demo.utils.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,8 +30,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 // 将 userId 设置到请求属性中
                 request.setAttribute("userId", userId);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (ExpiredJwtException e) {
+                // 处理token过期
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);    // 401
+                response.getWriter().write(e.getMessage());
+                return;
+            }catch(JwtException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);    // 401
+                response.getWriter().write(e.getMessage());
+                return;
             }
         }
         filterChain.doFilter(request, response);

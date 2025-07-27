@@ -21,13 +21,6 @@ const recommendedVideos = ref()
 // 获取首页推荐视频
 const getVideos = async () => {
     const res = await getRandomVideos(20)
-        .catch(errorMsg => {
-            if (errorMsg.status === 403) {
-                alert('认证已过期，请重新登录')
-                router.push('/login')
-            }
-
-        })
     if (res.success) {
         recommendedVideos.value = res.data
     }
@@ -36,13 +29,11 @@ const getVideos = async () => {
             message: res.message,
             type: 'error'
         })
-        console.log(res.message)
     }
 }
 
 onMounted(() => {
     getVideos()
-    console.log(import.meta.env.VITE_BASE_URL)
 })
 
 </script>
