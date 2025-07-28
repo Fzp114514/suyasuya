@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 defineOptions({
     name: 'Search'
 })
-import { useSearchStore } from '@/stores/search';
-import { inject, onMounted, ref } from 'vue';
+import { useSearchStore } from '@/stores/search'
+import { ref } from 'vue'
 
 const searchStore = useSearchStore()
 
@@ -14,7 +14,7 @@ const VideosSortord = ref(['最多播放', '最新发布', '最多收藏'])
 const UsersSortord = ref(['最多粉丝数', '最多播放量', '最多点赞数'])
 const selectType = ref('最多播放')
 
-const changeSelectType = value => {
+const changeSelectType = (value: string) => {
     if (value === '视频') {
         isSearchVideos.value = true
         selectType.value = '最多播放'
@@ -25,7 +25,7 @@ const changeSelectType = value => {
     }
 }
 
-const changeSortord = type => {
+const changeSortord = (type: string) => {
     if (selectType.value === type)
         return
     selectType.value = type

@@ -1,39 +1,56 @@
-<script setup>
-import { getUserInfo, updateUserInfo } from '@/api/userInfo';
-import SecurityRightTitle from '@/components/SecurityRightTitle.vue';
-import { useUserStore } from '@/stores/user';
-import { ElMessage } from 'element-plus';
-import { onMounted, ref } from 'vue';
+<script setup lang="ts">
 
-const userStore = useUserStore()
+import SecurityRightTitle from '@/components/SecurityRightTitle.vue'
+import { getUserInfo, updateUserInfo } from '@/api/userInfo'
+import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/stores/user'
+import { onMounted, ref } from 'vue'
 
-const userInfo = ref({
+interface UserInfo {
+    userName: string,
+    signature: string,
+    gender: string,
+    birthday: string
+}
+
+const userInfo = ref<UserInfo>({
     userName: '',
     signature: '',
     gender: '',
     birthday: '',
 })
 
+const userStore = useUserStore()
+
 const saveUserInfo = async () => {
-    const res = await updateUserInfo(userInfo.value)
-    console.log(res)
-    if (res.success) {
-        userStore.updateUserInfo(userStore.getUserId())
+    try {
+        const res = await updateUserInfo(userInfo.value)
+        console.log(res)
+        if (res.success) {
+            await userStore.updateUserInfo()
+            ElMessage({
+                message: res.message,
+                type: 'success'
+            })
+        }
+        else {
+            ElMessage({
+                message: res.message,
+                type: 'error'
+            })
+        }
+    } catch (error) {
+        console.error('保存用户信息失败:', error)
         ElMessage({
-            message: res.message,
-            type: 'success'
-        })
-    }
-    else {
-        ElMessage({
-            message: res.message,
+            message: '保存用户信息失败，请重试',
             type: 'error'
         })
     }
+
 }
 
 onMounted(async () => {
-    const res = await getUserInfo(userStore.getUserId())
+    const res = await getUserInfo()
     if (res.success) userInfo.value = res.data
     else {
         ElMessage({

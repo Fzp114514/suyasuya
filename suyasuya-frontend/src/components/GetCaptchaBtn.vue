@@ -1,11 +1,12 @@
-<script setup>
+<script setup lang="ts">
 const props = defineProps({
     email: String,
     type: String
 })
-import { getLoginCaptcha } from '@/api/login';
-import { getRegisterCaptcha } from '@/api/register';
-import { ref } from 'vue';
+import { getLoginCaptcha } from '@/api/login'
+import { getRegisterCaptcha } from '@/api/register'
+import { ElMessage } from 'element-plus'
+import { ref } from 'vue'
 
 const emailReg = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/    // 邮箱正则
 const getCodeBtnContent = ref('获取验证码')
@@ -14,7 +15,7 @@ const coolingTime = ref(60)                 // 冷却时间
 const isCodeBtnDisabled = ref(false)
 
 const getVerCode = async () => {
-    if (props.email === '') {
+    if (!props.email) {
         ElMessage({
             message: '请输入电子邮箱',
             type: 'error'
@@ -38,6 +39,13 @@ const getVerCode = async () => {
     else if (props.type === 'login') {
         res = await getLoginCaptcha(props.email)
         console.log(res)
+    }
+    if (!res) {
+        ElMessage({
+            message: '获取验证码失败，请稍后再试',
+            type: 'error'
+        })
+        return
     }
     if (res.success) {
         ElMessage({

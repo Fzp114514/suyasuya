@@ -1,8 +1,23 @@
-<script setup>
-import { formatUploadTime, formatVideoDuration, formatViewCounts, formatWrapText, getBaseUrl } from '@/main';
+<script setup lang="ts">
+import { formatUploadTime, formatVideoDuration, formatViewCounts, formatWrapText, getBaseUrl } from '@/main'
+import { onMounted } from 'vue'
 
-const props = defineProps({
-    videosMsg: Object
+interface VideoMsg {
+    videoId: number
+    title: string
+    cover: string
+    duration: number
+    uploadTime: string
+    viewCount: number
+    introduction: string
+}
+
+const props = defineProps<{ videosMsg: VideoMsg }>()
+
+onMounted(() => {
+    if (!props.videosMsg) {
+        console.error('videosMsg is required for LargeListVideoBox component')
+    }
 })
 
 </script>
@@ -26,7 +41,7 @@ const props = defineProps({
                     <span>{{ formatViewCounts(videosMsg.viewCount) }}</span>
                 </div>
                 <div class="length">
-                    <span>{{ formatUploadTime(videosMsg.uploadTime) }}</span>
+                    <span>{{ formatUploadTime(+videosMsg.uploadTime) }}</span>
                 </div>
             </div>
             <div class="desc" :title="videosMsg.introduction" v-html="formatWrapText(videosMsg.introduction)">

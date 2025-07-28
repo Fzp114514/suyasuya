@@ -1,20 +1,20 @@
-<script setup>
-import { useDisplayStore } from '@/stores/display'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { debounce, getBaseUrl, throttle } from '@/main'
+<script setup lang="ts">
 import { incrementVideoViews } from '@/api/videoPlayback'
+import { debounce, getBaseUrl, throttle } from '@/main'
+import { useDisplayStore } from '@/stores/display'
 import { usePlaybackStatusStore } from '@/stores/playbackStatus'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const displayStore = useDisplayStore()
 const playbackStatusStore = usePlaybackStatusStore()
 
-const isOpenDanmaku = ref()          // 是否开启弹幕
-const isControls = ref(false)        // 视频控制器显示状态
-const isIndicator = ref(false)       // 进度条标志显示状态
-const isVideoPlay = ref(false)       // 视频播放状态
-const isVolumeMute = ref(false)      // 视频是否静音
-const isFullscreen = ref(false)      // 视频是否全屏
-const isInputting = ref(false)       // 是否正在输入文字
+const isOpenDanmaku = ref<boolean>()          // 是否开启弹幕
+const isControls = ref<boolean>(false)        // 视频控制器显示状态
+const isIndicator = ref<boolean>(false)       // 进度条标志显示状态
+const isVideoPlay = ref<boolean>(false)       // 视频播放状态
+const isVolumeMute = ref<boolean>(false)      // 视频是否静音
+const isFullscreen = ref<boolean>(false)      // 视频是否全屏
+const isInputting = ref<boolean>(false)       // 是否正在输入文字
 
 // 同步弹幕显示状态至状态管理仓库
 const changeDanmakuState = () => {
@@ -32,29 +32,29 @@ const props = defineProps({          // 父组件传值 视频Url
     }
 })
 
-const videoPlayer = ref(null)        // 获取Dom元素 video
-const videoContainer = ref(null)     // 获取Dom元素 videoContainer 父组件控制全屏
+const videoPlayer = ref<HTMLVideoElement>()        // 获取Dom元素 video
+const videoContainer = ref<HTMLDivElement>()     // 获取Dom元素 videoContainer 父组件控制全屏
 
-const currentTime = ref(0)           // 当前视频播放时间
-const duration = ref(0)              // 视频总时长
-const currentProgress = ref(0)       // 当前进度条百分比
-const loadedProgress = ref(0)        // 已加载进度条百分比
-const formattedCurrentTime = ref(null)
-const formattedDuration = ref(null)
-
+const currentTime = ref<number>(0)           // 当前视频播放时间
+const duration = ref<number>(0)              // 视频总时长
+const currentProgress = ref<number>(0)       // 当前进度条百分比
+const loadedProgress = ref<number>(0)        // 已加载进度条百分比
+const formattedCurrentTime = ref<string>('00:00') // 格式化后的当前时间
+const formattedDuration = ref<string>('00:00') // 格式化后的总时长
 
 // 初始化操作
 const onMetaDataLoaded = () => {
+    if (!videoPlayer.value) return
     duration.value = videoPlayer.value.duration
     formattedDuration.value = formatVideoDuration(duration.value)
     formattedCurrentTime.value = formatVideoDuration(currentTime.value)
     const buffered = videoPlayer.value.buffered
     if (buffered.length > 0)
-        loadedProgress.value = ((buffered.end(buffered - 1)) / duration.value) * 100
+        loadedProgress.value = ((buffered.end(buffered.length - 1)) / duration.value) * 100
 }
 
 // 格式化视频时长
-const formatVideoDuration = time => {
+const formatVideoDuration = (time: number): string => {
     const hours = Math.floor(time / 3600)
     const minutes = Math.floor((time % 3600) / 60)
     const seconds = Math.round(time % 60)
@@ -79,6 +79,7 @@ const updateCurrentProgress = () => {
 
 // 更新缓冲进度条
 const updateLoadedProgress = () => {
+    if (!videoPlayer.value) return
     const buffered = videoPlayer.value.buffered
     if (buffered.length > 0) {
         for (let i = 0; i < buffered.length; i++) {
@@ -94,10 +95,12 @@ const updateLoadedProgress = () => {
 const timeupdate = throttle(updateCurrentProgress, 1000)
 
 // 修改当播放进度方法 (通过点击进度条触发)
-const changeCurrentTime = e => {
-    const progressBar = e.currentTarget
+const changeCurrentTime = (e: MouseEvent) => {
+    const progressBar = e.currentTarget as HTMLElement | null
     const offsetX = e.offsetX
     console.log(e)
+    if (!progressBar) return
+    if (!videoPlayer.value) return
     const newTime = (offsetX / progressBar.offsetWidth) * videoPlayer.value.duration
     videoPlayer.value.currentTime = newTime
     updateCurrentProgress()
@@ -106,6 +109,7 @@ const changeCurrentTime = e => {
 const changePlayingState = () => isVideoPlay.value ? videoPause() : videoPlay()
 
 const videoPlay = () => {
+    if (!videoPlayer.value) return
     videoPlayer.value.play()
         .then(() => {
             isVideoPlay.value = true
@@ -115,6 +119,7 @@ const videoPlay = () => {
         })
 }
 const videoPause = () => {
+    if (!videoPlayer.value) return
     videoPlayer.value.pause()
     isVideoPlay.value = false
 }
@@ -143,19 +148,23 @@ const onMouseMove = throttle(showControlsInFullscreen, 100)
 // 视频播放音量控制相关方法 传参为0-1区间内的音量改变值
 const isVolumePromptMessage = ref(false)
 
-const increaseVideoVolume = value => {
+const increaseVideoVolume = (value: number) => {
+    if (!videoPlayer.value) return
     // 确保音量不超过1
-    videoPlayer.value.volume = Math.min(videoPlayer.value.volume + value, 1).toFixed(2);
-    playbackStatusStore.setPlaybackVolume(parseInt(videoPlayer.value.volume * 100))
+    videoPlayer.value.volume = +Math.min(videoPlayer.value.volume + value, 1).toFixed(2)
+    const volume = videoPlayer.value.volume * 100
+    playbackStatusStore.setPlaybackVolume(parseInt(volume.toString()))
     isVolumePromptMessage.value = true
     timingHideVolumePromptMessage()
     console.log(`当前音量为：${playbackStatusStore.playbackVolume}`)
 }
 
-const reduceVideoVolume = value => {
+const reduceVideoVolume = (value: number) => {
+    if (!videoPlayer.value) return
     // 确保音量不小于0
-    videoPlayer.value.volume = Math.max(videoPlayer.value.volume - value, 0).toFixed(2);
-    playbackStatusStore.setPlaybackVolume(parseInt(videoPlayer.value.volume * 100))
+    videoPlayer.value.volume = +Math.max(videoPlayer.value.volume - value, 0).toFixed(2)
+    const volume = videoPlayer.value.volume * 100
+    playbackStatusStore.setPlaybackVolume(parseInt(volume.toString()))
     isVolumePromptMessage.value = true
     timingHideVolumePromptMessage()
     console.log(`当前音量为：${playbackStatusStore.playbackVolume}`)
@@ -169,37 +178,23 @@ const toggleFullscreen = () => {
         // 退出全屏
         if (document.exitFullscreen) {
             document.exitFullscreen()
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen()                     // 针对Safari
-        } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen()                      // 针对Firefox
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen()                         // 针对IE
         }
         isFullscreen.value = false
 
     } else {
         // 进入全屏
+        if (!videoContainer.value) return
         if (videoContainer.value.requestFullscreen) {
             videoContainer.value.requestFullscreen()
-        } else if (videoContainer.value.webkitRequestFullscreen) {
-            videoContainer.value.webkitRequestFullscreen()      // 针对Safari
-        } else if (videoContainer.value.mozRequestFullScreen) {
-            videoContainer.value.mozRequestFullScreen()         // 针对Firefox
-        } else if (videoContainer.value.msRequestFullscreen) {
-            videoContainer.value.msRequestFullscreen()          // 针对IE
+            isFullscreen.value = true
         }
-        isFullscreen.value = true
     }
 }
 
 // 监听页面全屏变化，处理退出全屏时的逻辑(esc退出全屏时执行逻辑)
 const handleFullscreenChange = () => {
     if (
-        !document.fullscreenElement &&
-        !document.webkitFullscreenElement &&
-        !document.mozFullScreenElement &&
-        !document.msFullscreenElement
+        !document.fullscreenElement
     ) {
         // 当不在全屏模式下时
         isFullscreen.value = false
@@ -207,7 +202,7 @@ const handleFullscreenChange = () => {
 }
 
 // 快捷键触发方法
-const handleKeyDown = e => {
+const handleKeyDown = (e: KeyboardEvent) => {
     if (isInputting.value)
         return
     const inputKey = e.key
@@ -231,18 +226,22 @@ const handleKeyDown = e => {
             changeDanmakuState()
             break
         case 'ArrowLeft':
-            videoPlayer.value.currentTime > 5 ?
-                videoPlayer.value.currentTime -= 5 : videoPlayer.value.currentTime = 0
-            updateCurrentProgress()
-            if (!isVideoPlay.value)
-                videoPlay()
+            if (videoPlayer.value) {
+                videoPlayer.value.currentTime > 5 ?
+                    videoPlayer.value.currentTime -= 5 : videoPlayer.value.currentTime = 0
+                updateCurrentProgress()
+                if (!isVideoPlay.value)
+                    videoPlay()
+            }
             break
         case 'ArrowRight':
-            videoPlayer.value.currentTime < duration.value - 5 ?
-                videoPlayer.value.currentTime += 5 : videoPlayer.value.currentTime = duration.value
-            updateCurrentProgress()
-            if (!isVideoPlay.value)
-                videoPlay()
+            if (videoPlayer.value) {
+                videoPlayer.value.currentTime < duration.value - 5 ?
+                    videoPlayer.value.currentTime += 5 : videoPlayer.value.currentTime = duration.value
+                updateCurrentProgress()
+                if (!isVideoPlay.value)
+                    videoPlay()
+            }
             break
         case 'ArrowUp':
             e.preventDefault()
@@ -257,12 +256,12 @@ const handleKeyDown = e => {
     }
 }
 
-const handleInputFocus = e => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === "TEXTAREA")
+const handleInputFocus = (e: FocusEvent) => {
+    if (e.target && ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === "TEXTAREA"))
         isInputting.value = true
 }
-const handleInputBlur = e => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === "TEXTAREA")
+const handleInputBlur = (e: FocusEvent) => {
+    if (e.target && ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === "TEXTAREA"))
         isInputting.value = false
     if (isFullscreen.value)
         timingHideControls()
@@ -287,6 +286,7 @@ const onVideoLoaded = () => {
 const time = 30000
 const startTimer = () => {
     setTimeout(async () => {
+        if (props.videoId === undefined) return
         // 此处调用增加视频播放量方法
         const res = await incrementVideoViews(props.videoId)
         console.log(res)

@@ -1,13 +1,13 @@
-<script setup>
+<script setup lang="ts">
 defineOptions({
     name: 'TittleTattle'
 })
-import { getCategoryVideos, getRandomVideos } from '@/api/videoQuery'
 import Header from '@/components/Header.vue'
 import LargeVideoBox from '@/components/LargeVideoBox.vue'
 import PaletteBtn from '@/components/PaletteBtn.vue'
-import { useDisplayStore } from '@/stores/display'
+import { getCategoryVideos } from '@/api/videoQuery'
 import { ElMessage } from 'element-plus'
+import { useDisplayStore } from '@/stores/display'
 import { onMounted, ref } from 'vue'
 const displayStore = useDisplayStore()
 

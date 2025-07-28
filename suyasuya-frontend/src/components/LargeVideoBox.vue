@@ -1,5 +1,6 @@
-<script setup>
-import { formatUploadTime, formatVideoDuration, formatViewCounts, getBaseUrl } from '@/main';
+<script setup lang="ts">
+import { formatUploadTime, formatVideoDuration, formatViewCounts, getBaseUrl } from '@/main'
+
 
 // 要渲染的视频数据，通过父组件传值获得
 const props = defineProps({

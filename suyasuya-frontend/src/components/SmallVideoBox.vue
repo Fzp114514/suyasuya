@@ -1,5 +1,5 @@
-<script setup>
-import { formatUploadTime, formatVideoDuration, formatViewCounts } from '@/main';
+<script setup lang="ts">
+import { formatUploadTime, formatVideoDuration, formatViewCounts } from '@/main'
 
 
 const props = defineProps({

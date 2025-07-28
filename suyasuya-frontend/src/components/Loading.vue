@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useLoadingStore } from '@/stores/loading'
 import { computed, ref, watch } from 'vue'
 

@@ -1,35 +1,35 @@
-<script setup>
-import { createCollection, deleteCollection, getCollectionVideos, getUserCollections, removeVideoFromCollection, updateCollection } from '@/api/collection';
-import SmallVideoBox from '@/components/SmallVideoBox.vue';
-import { formatUploadTime } from '@/main';
-import { useUserStore } from '@/stores/user';
-import { ElMessage } from 'element-plus';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+<script setup lang="ts">
+import { createCollection, deleteCollection, getCollectionVideos, getUserCollections, removeVideoFromCollection, updateCollection } from '@/api/collection'
+import SmallVideoBox from '@/components/SmallVideoBox.vue'
+import { ElMessage } from 'element-plus'
+import { formatUploadTime } from '@/main'
+import { useUserStore } from '@/stores/user'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 const userStore = useUserStore()
 
-const isSidenavOpen = ref(true)
+const isSidenavOpen = ref<boolean>(true)
 
 
-const selectedCollectionId = ref()        // 记录当前被选中的收藏夹
-const createDialogVisible = ref(false)    // 创建收藏夹弹窗显示状态
-const updateDialogVisible = ref(false)    // 修改收藏夹信息弹窗的显示状态
-const deleteDialogVisible = ref(false)    // 修改删除收藏夹弹窗的显示状态
+const selectedCollectionId = ref<number | null>(null)        // 记录当前被选中的收藏夹
+const createDialogVisible = ref<boolean>(false)    // 创建收藏夹弹窗显示状态
+const updateDialogVisible = ref<boolean>(false)    // 修改收藏夹信息弹窗的显示状态
+const deleteDialogVisible = ref<boolean>(false)    // 修改删除收藏夹弹窗的显示状态
 
-const openOrCloseSidenavOpen = () => isSidenavOpen.value = !isSidenavOpen.value
-const openCreateDialog = () => createDialogVisible.value = true
+const openOrCloseSidenavOpen = (): boolean => isSidenavOpen.value = !isSidenavOpen.value
+const openCreateDialog = (): boolean => createDialogVisible.value = true
 
 const videos = ref([])        // 要显示的视频信息
 
 // 分页组件相关信息
-const currentPage = ref(1)  // 当前页数
-const pages = ref(1)        // 总页数
-const size = ref(18)        // 每页的视频个数
-const total = ref(1)        // 总视频个数
+const currentPage = ref<number>(1)  // 当前页数
+const pages = ref<number>(1)        // 总页数
+const size = ref<number>(18)        // 每页的视频个数
+const total = ref<number>(1)        // 总视频个数
 
 // 新建收藏夹的信息
-const newCollectionName = ref('')
-const newCollectionDes = ref('')
+const newCollectionName = ref<string>('')
+const newCollectionDes = ref<string>('')
 
 // 创建收藏夹方法
 const createNewCollection = async () => {
@@ -77,7 +77,7 @@ const getAllCollections = async () => {
 }
 
 // 改变显示的收藏夹方法
-const changeSelectCollection = collectionId => {
+const changeSelectCollection = (collectionId: number) => {
     if (selectedCollectionId.value === collectionId)
         return
     selectedCollectionId.value = collectionId
@@ -85,7 +85,7 @@ const changeSelectCollection = collectionId => {
 }
 
 // 获取收藏夹内视频方法
-const getVideosInCollection = async collectionId => {
+const getVideosInCollection = async (collectionId: number) => {
     selectedCollectionId.value = collectionId
     console.log('触发获取视频方法')
     const res = await getCollectionVideos(collectionId, currentPage.value, size.value)
@@ -104,118 +104,147 @@ const getVideosInCollection = async collectionId => {
     }
 }
 
-const handelCurrentChange = page => {
+const handelCurrentChange = (page: number): void => {
     currentPage.value = page
-    getVideosInCollection(selectedCollectionId.value)
+    if (selectedCollectionId.value !== null) {
+        getVideosInCollection(selectedCollectionId.value)
+    }
 }
 
 // 删除收藏夹内视频方法
-const removeVideo = async videoId => {
-    const res = await removeVideoFromCollection(selectedCollectionId.value, videoId)
-    if (res.success) {
-        selectCollectionId.value = ''
-        getAllCollections()
-        getVideosInCollection(selectedCollectionId.value)
+const removeVideo = async (videoId: number): Promise<void> => {
+    if (selectedCollectionId.value === null) return
+    try {
+        const res = await removeVideoFromCollection(selectedCollectionId.value, videoId)
+        if (res.success) {
+            await getAllCollections()
+            await getVideosInCollection(selectedCollectionId.value)
+            ElMessage({
+                message: res.message,
+                type: 'success'
+            })
+        }
+        else {
+            ElMessage({
+                message: res.message || '删除视频失败',
+                type: 'error'
+            })
+        }
+    } catch (error) {
+        console.error('删除视频时发生错误:', error)
         ElMessage({
-            message: res.message,
-            type: 'success'
-        })
-    }
-    else {
-        ElMessage({
-            message: res.message,
+            message: '删除视频时发生错误',
             type: 'error'
         })
     }
 }
 
-const openUpdateDialog = (collectionId, collectionName, collectionDes) => {
+const openUpdateDialog = (collectionId: number, collectionName: string, collectionDes: string): void => {
     updateCollectionName.value = collectionName
-    if (collectionDes)
-        updateCollectionDes.value = collectionDes
+    updateCollectionDes.value = collectionDes || ''
     updateCollectionId.value = collectionId
     updateDialogVisible.value = true
 }
 
-const updateCollectionId = ref('')       // 要修改的收藏夹的id  
-const updateCollectionName = ref('')     // 要修改的收藏夹的名称
-const updateCollectionDes = ref('')      // 要修改的收藏夹的描述
+const updateCollectionId = ref<number | null>(null)               // 要修改的收藏夹的id  
+const updateCollectionName = ref<string>('')                      // 要修改的收藏夹的名称
+const updateCollectionDes = ref<string>('')                       // 要修改的收藏夹的描述
 
 
 // 更新收藏夹信息方法
-const updateCollectionInfo = async () => {
-    const requestData = {
-        collectionId: updateCollectionId.value,
-        collectionName: updateCollectionName.value,
-        description: updateCollectionDes.value
-    }
-    const res = await updateCollection(requestData)
-    console.log(res)
-    if (res.success) {
-        getAllCollections()
+const updateCollectionInfo = async (): Promise<void> => {
+    if (updateCollectionId.value === null) return
+    try {
+        const requestData = {
+            collectionId: updateCollectionId.value,
+            collectionName: updateCollectionName.value,
+            description: updateCollectionDes.value
+        }
+        const res = await updateCollection(requestData)
+        console.log(res)
+        if (res.success) {
+            await getAllCollections()
+            ElMessage({
+                message: res.message,
+                type: 'success'
+            })
+        }
+        else {
+            ElMessage({
+                message: res.message || '更新收藏夹信息失败',
+                type: 'error'
+            })
+        }
+    } catch (error) {
+        console.error('更新收藏夹信息时发生错误:', error)
         ElMessage({
-            message: res.message,
-            type: 'success'
-        })
-        updateDialogVisible.value = false
-    }
-    else {
-        ElMessage({
-            message: res.message,
+            message: '更新收藏夹信息时发生错误',
             type: 'error'
         })
+    } finally {
+        updateDialogVisible.value = false
     }
 }
 
-const deleteCollectionId = ref()
+const deleteCollectionId = ref<number | null>(null) // 要删除的收藏夹id
 
-const openDeleteDialog = collectionId => {
+const openDeleteDialog = (collectionId: number) => {
     deleteCollectionId.value = collectionId
     deleteDialogVisible.value = true
 }
 
 // 删除收藏夹内视频方法
-const removeCollection = async () => {
-    const res = await deleteCollection(deleteCollectionId.value)
-    console.log(res)
-    if (res.success) {
-        deleteDialogVisible.value = false
+const removeCollection = async (): Promise<void> => {
+    if (deleteCollectionId.value === null) return
+    try {
+        const res = await deleteCollection(deleteCollectionId.value)
+        console.log(res)
+        if (res.success) {
+            ElMessage({
+                message: res.message,
+                type: 'success'
+            })
+            getAllCollections()
+        }
+        else {
+            ElMessage({
+                message: res.message || '删除收藏夹失败',
+                type: 'error'
+            })
+        }
+    } catch (error) {
+        console.error('删除收藏夹时发生错误:', error)
         ElMessage({
-            message: res.message,
-            type: 'success'
-        })
-        getAllCollections()
-    }
-    else {
-        ElMessage({
-            message: res.message,
+            message: '删除收藏夹时发生错误',
             type: 'error'
         })
+    } finally {
+        deleteDialogVisible.value = false
     }
 }
 
-const hoverCollectionId = ref()
+const hoverCollectionId = ref<number | null>(null)              // 鼠标悬停的收藏夹id
 
-const selectCollectionId = ref(null)              // 当前选中的收藏夹id
-const editCollection = collectionId => {
+const selectCollectionId = ref<number | null>(null)              // 当前选中的收藏夹id
+const editCollection = (collectionId: number) => {
     selectCollectionId.value = selectCollectionId.value === collectionId ? null : collectionId
 }
 
-const selectedVideoId = ref(null)           // 当前选中的收藏视频id
-const editCollectionVideo = videoId => {
+const selectedVideoId = ref<number | null>(null)           // 当前选中的收藏视频id
+const editCollectionVideo = (videoId: number): void => {
     selectedVideoId.value = selectedVideoId.value === videoId ? null : videoId
 }
-const handleGlobalClick = e => {
-    // 获取事件路径中的所有元素
-    const path = e.composedPath()
+const handleGlobalClick = (e: MouseEvent) => {
+    const target = e.target as HTMLElement
 
-    // 检查点击是否发生在菜单或按钮内部
-    const isInside = path.some(el => {
-        return el.classList?.contains('collection-video-edit-btn') ||
-            el.classList?.contains('collection-edit-btn')
-    })
+    // 检查点击是否发生在编辑按钮内部
+    const isEditButton =
+        target.classList.contains('collection-video-edit-btn') ||
+        target.classList.contains('collection-edit-btn') ||
+        target.closest('.collection-video-edit-btn') ||
+        target.closest('.collection-edit-btn')
 
-    if (!isInside) {
+    if (!isEditButton) {
         selectedVideoId.value = null
         selectCollectionId.value = null
     }
@@ -249,7 +278,7 @@ onBeforeUnmount(() => {
                     <ul>
                         <li v-for="(item, index) in collections" :key="index"
                             @click="changeSelectCollection(item.collectionId)"
-                            @mouseenter="hoverCollectionId = item.collectionId" @mouseleave="hoverCollectionId = ''"
+                            @mouseenter="hoverCollectionId = item.collectionId" @mouseleave="hoverCollectionId = null"
                             :class="{ item, active: selectedCollectionId === item.collectionId }">
                             <el-icon size="20px"><i-ep-Folder /></el-icon>
                             <span class="text">{{ item.collectionName }}</span>
@@ -284,7 +313,8 @@ onBeforeUnmount(() => {
                                 </div>
                             </div>
                             <div v-show="selectedVideoId === video.videoId" class="edit-panel">
-                                <div @click="removeVideo(selectedVideoId)" class="edit-panel-item">取消收藏</div>
+                                <div @click="selectedVideoId !== null && removeVideo(selectedVideoId)"
+                                    class="edit-panel-item">取消收藏</div>
                             </div>
                         </div>
                     </template>
@@ -358,5 +388,5 @@ onBeforeUnmount(() => {
     </div>
 </template>
 <style scoped>
-@import url(../../assets/css/views/favorites.css);
+@import url(../../assets/css/views/favorites.css)
 </style>

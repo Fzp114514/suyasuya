@@ -1,23 +1,25 @@
-<script setup>
+<script setup lang="ts">
 defineOptions({
     name: 'SpaceHome'
 })
 const props = defineProps({
     isMe: Boolean,
 })
-import SmallVideoBox from '@/components/SmallVideoBox.vue';
-import { useUserStore } from '@/stores/user';
-import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { formatUploadTime, formatViewCounts } from '@/main';
-import LargeListVideoBox from '@/components/LargeListVideoBox.vue';
-import { getVideosByUserByUploadTime, getVideosByUserByViewCount } from '@/api/videoQuery';
-import { ElMessage } from 'element-plus';
-import { getOtherUserInfo, getUserInfo } from '@/api/userInfo';
-import { getRecentCollectedVideos } from '@/api/collection';
-import ListVideoBox from '@/components/ListVideoBox.vue';
-import { getMasterpiece, updateMasterpiece } from '@/api/userMasterpiece';
-import router from '@/router';
+import SmallVideoBox from '@/components/SmallVideoBox.vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import LargeListVideoBox from '@/components/LargeListVideoBox.vue'
+import { ElMessage } from 'element-plus'
+import ListVideoBox from '@/components/ListVideoBox.vue'
+import { useUserStore } from '@/stores/user'
+import { getOtherUserInfo, getUserInfo } from '@/api/userInfo'
+import { getMasterpiece, updateMasterpiece } from '@/api/userMasterpiece'
+import { getVideosByUserByCollectionCount } from '@/api/videoQuery'
+import router from '@/router'
+import { getRecentCollectedVideos } from '@/api/collection'
+import { formatUploadTime, formatViewCounts } from '@/main'
+import { Masterpiece, UserInfo } from '@/types/user'
+import { VideoInfo } from '@/types/video'
 
 const route = useRoute()
 const userStore = useUserStore()
@@ -28,42 +30,60 @@ const subVideos = ref([])
 const favorites = ref([])
 
 // 用户信息
-const userInfo = ref({})
+const userInfo = ref<UserInfo>({
+    userId: 0,
+    userName: '',
+    avatar: '',
+    birthday: '',
+    gender: 'Other',
+    signature: '',
+    announcement: '',
+    followCount: 0,
+    fanCount: 0,
+    likeCount: 0,
+    viewCount: 0
+} as UserInfo)
 const userGender = computed(() => {
-    if (userInfo.value.gender === 'Male')
-        return '男'
-    if (userInfo.value.gender === 'Female')
-        return '女'
-    if (userInfo.value.gender === 'Other')
-        return '保密'
+    if (!userInfo.value.gender) return ''
+    switch (userInfo.value.gender) {
+        case 'Male': return '男'
+        case 'Female': return '女'
+        case 'Other': return '保密'
+        default: return ''
+    }
 })
 
 // 个人空间公告
-const announcement = ref('')
+const announcement = ref<string>('')
 
 // 文本框计数器显示状态
-const isShowCounter = ref(false)
-const currentWordCount = ref(0)
-const maxWordCount = ref(120)
-const getNumber = e => {
-    if (currentWordCount.value < maxWordCount.value)
-        currentWordCount.value = e.target.value.length
+const isShowCounter = ref<boolean>(false)
+const currentWordCount = ref<number>(0)
+const maxWordCount = ref<number>(120)
+const getNumber = (e: Event) => {
+    const target = e.target as HTMLTextAreaElement
+    if (target.value.length < maxWordCount.value)
+        currentWordCount.value = target.value.length
 }
 // 提示框显示状态
-const dialogVisible = ref(false)
+const dialogVisible = ref<Boolean>(false)
 // 个人空间公告修改方法(只有用户个人空间页才会触发，无需考虑其他用户)
-const changeAnnouncement = async () => {
+const changeAnnouncement = async (): Promise<void> => {
     isShowCounter.value = false
     if (announcement.value) announcement.value = announcement.value.trim()
     if (announcement.value === userInfo.value.announcement) {
         dialogVisible.value = true
         return
     }
-    else {
+    try {
+        // 调用API保存公告
+        await userStore.setAnnouncement(announcement.value)
         userInfo.value.announcement = announcement.value
-        console.log(userStore.getAnnouncement())
-        // 此处调用api保存公告
-        userStore.setAnnouncement(announcement.value)
+    } catch (error) {
+        console.error('保存公告失败:', error)
+        ElMessage.error('保存公告失败，请重试')
+        // 恢复原始值
+        announcement.value = userInfo.value.announcement || ''
     }
 }
 // 个人资料修改方法
@@ -72,72 +92,98 @@ const modifyInfo = () => {
 }
 
 
-const selectVisible = ref(false)    // 选择代表作弹窗显示状态
+const selectVisible = ref<Boolean>(false)    // 选择代表作弹窗显示状态
 
 // 代表作信息
-const masterpiece = ref({
-    videoId: '',
-    uploadTime: '',
-    viewCount: 0,
+const masterpiece = ref<Masterpiece>({
+    videoId: -1,
+    cover: '',
     duration: 0,
     title: '',
-    cover: '',
+    viewCount: 0,
+    uploadTime: '',
     introduction: ''
 })
 
-const userAllVideos = ref()     // 用户的所有投稿视频
+const userAllVideos = ref<VideoInfo[]>()     // 用户的所有投稿视频
 
-const selectMasterpiece = () => {
+const selectMasterpiece = (): void => {
     getSubVideos()
 }
 
 
 // 分页组件相关信息
-const currentPage = ref(1)  // 当前页数
-const pages = ref(1)        // 总页数
-const size = ref(4)         // 每页的视频个数
-const total = ref(1)        // 总视频个数
+const currentPage = ref<number>(1)  // 当前页数
+const pages = ref<number>(1)        // 总页数
+const size = ref<number>(4)         // 每页的视频个数
+const total = ref<number>(1)        // 总视频个数
 
-const handelCurrentChange = page => {
+const handelCurrentChange = (page: number): void => {
     currentPage.value = page
     getSubVideos()
 }
 
 // 获取用户投稿视频
-const getSubVideos = async () => {
-    const res = await getVideosByUserByViewCount(userStore.getUserId(), currentPage.value, size.value)
-    if (res.success) {
-        userAllVideos.value = res.data.records
-        pages.value = res.data.pages
-        total.value = res.data.total
-        selectVisible.value = true
+const getSubVideos = async (): Promise<void> => {
+    try {
+        const userId = userStore.getUserId();
+        if (!userId) {
+            throw new Error('用户未登录');
+        }
+        const res = await getVideosByUserByCollectionCount(userStore.getUserId(), currentPage.value, size.value)
+        if (res.success && res.data) {
+            userAllVideos.value = res.data.records || []
+            pages.value = res.data.pages || 1
+            total.value = res.data.total || 0
+            selectVisible.value = true
+            console.log(res)
+        } else {
+            throw new Error(res.message || '获取用户投稿视频失败')
+        }
+    } catch (error) {
+        console.error('获取用户投稿视频失败:', error)
+        ElMessage.error('获取用户投稿视频失败')
     }
-    console.log(res)
 }
 
-const setMasterpiece = async videoId => {
-    const res = await updateMasterpiece(videoId)
-    if (res.success) {
-        ElMessage({
-            message: res.message,
-            type: 'success'
-        })
-        getUserMasterpiece(route.params.userId)
-        selectVisible.value = false
+const setMasterpiece = async (videoId: number): Promise<void> => {
+    try {
+        const res = await updateMasterpiece(videoId)
+        if (res.success) {
+            ElMessage({
+                message: res.message,
+                type: 'success'
+            })
+            // 重新获取用户代表作
+            await getUserMasterpiece(+route.params.userId)
+            selectVisible.value = false
+            console.log(res)
+        } else {
+            throw new Error(res.message || '设置代表作失败')
+        }
+    } catch (error) {
+        console.error('设置代表作失败:', error)
+        ElMessage.error('设置代表作失败')
     }
-    console.log(res)
 }
 
 // 获取用户代表作方法
-const getUserMasterpiece = async userId => {
-    const res = await getMasterpiece(userId)
-    console.log(res)
-    if (res.success) {
-        masterpiece.value = res.data
+const getUserMasterpiece = async (userId: number): Promise<void> => {
+    try {
+        const res = await getMasterpiece(userId)
+        console.log(res)
+        if (res.success && res.data) {
+            masterpiece.value = res.data
+        } else {
+            throw new Error(res.message || '获取用户代表作失败')
+        }
+    } catch (error) {
+        console.error('获取用户代表作失败:', error)
+        ElMessage.error('获取用户代表作失败')
     }
 }
 
-const logoutConfig = ref(false)     // 登出提示弹窗显示状态
+const logoutConfig = ref<boolean>(false)     // 登出提示弹窗显示状态
 const logout = () => {
     localStorage.removeItem('token')
     userStore.clearUserInfo()
@@ -145,49 +191,68 @@ const logout = () => {
 }
 
 // 初始化数据方法
-const initialize = async () => {
-    let res
-    if (props.isMe)
-        res = await getUserInfo()
-    else
-        res = await getOtherUserInfo(route.params.userId)
-    if (res.success) {
-        userInfo.value = res.data
-    }
-    else {
-        ElMessage({
-            message: res.message,
-            type: 'error'
-        })
-        console.log(res)
-    }
+const initialize = async (): Promise<void> => {
+    try {
+        const userId = Number(route.params.userId)
 
-    announcement.value = userInfo.value.announcement
-    announcement.value ? currentWordCount.value = announcement.value.length : ''
-    // 此处应调用api获取 masterWork, subVideos, favorites等数据
-    getUserMasterpiece(route.params.userId)
-    const subVideosRes = await getVideosByUserByUploadTime(route.params.userId, 1, 5)
-    if (subVideosRes.success) {
-        subVideos.value = subVideosRes.data.records
+        if (isNaN(userId)) {
+            throw new Error('无效的用户ID')
+        }
+        let res
+        if (props.isMe) {
+            res = await getUserInfo()
+        } else {
+            res = await getOtherUserInfo(userId)
+        }
+        if (res.success && res.data) {
+            userInfo.value = res.data;
+            announcement.value = userInfo.value.announcement || ''
+            currentWordCount.value = announcement.value.length
+
+            // 获取代表作、投稿视频和收藏视频
+            await Promise.all([
+                getUserMasterpiece(userId),
+                getSubVideosData(),
+                getFavoritesData(userId)
+            ])
+        } else {
+            throw new Error(res.message || '获取用户信息失败')
+        }
+    } catch (error) {
+        console.error('初始化失败:', error)
+        ElMessage.error('初始化失败')
     }
-    else {
-        ElMessage({
-            message: subVideosRes.message,
-            type: 'error'
-        })
-        console.log(subVideosRes)
+}
+// 获取投稿视频数据
+const getSubVideosData = async (): Promise<void> => {
+    try {
+        const userId = Number(route.params.userId)
+        const res = await getVideosByUserByCollectionCount(userId, 1, 5)
+
+        if (res.success && res.data) {
+            subVideos.value = res.data.records || []
+        } else {
+            throw new Error(res.message || '获取投稿视频失败')
+        }
+    } catch (error) {
+        console.error('获取投稿视频失败:', error)
+        ElMessage.error('获取投稿视频失败')
     }
-    const favoritesRes = await getRecentCollectedVideos(route.params.userId, 5)
-    if (favoritesRes.success) {
-        favorites.value = favoritesRes.data
-        console.log(favorites.value)
-    }
-    else {
-        ElMessage({
-            message: favoritesRes.message,
-            type: 'error'
-        })
-        console.log(favoritesRes)
+}
+
+// 获取收藏视频数据
+const getFavoritesData = async (userId: number): Promise<void> => {
+    try {
+        const res = await getRecentCollectedVideos(userId, 5)
+
+        if (res.success && res.data) {
+            favorites.value = res.data
+        } else {
+            throw new Error(res.message || '获取收藏视频失败')
+        }
+    } catch (error) {
+        console.error('获取收藏视频失败:', error)
+        ElMessage.error('获取收藏视频失败')
     }
 }
 
@@ -329,5 +394,5 @@ onMounted(() => {
     </el-dialog>
 </template>
 <style scoped>
-@import url(../../assets/css/views/spacehome.css);
+@import url(../../assets/css/views/spacehome.css)
 </style>

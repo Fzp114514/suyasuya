@@ -1,30 +1,48 @@
-<script setup>
+<script setup lang="ts">
+import SecurityRightTitle from '@/components/SecurityRightTitle.vue'
 import { updateAvatar } from '@/api/userInfo';
-import SecurityRightTitle from '@/components/SecurityRightTitle.vue';
-import { useUserStore } from '@/stores/user';
-import { ElMessage, genFileId } from 'element-plus';
-import { computed, reactive, ref } from 'vue';
+import { ElMessage, genFileId, UploadFile, UploadFiles, UploadInstance } from 'element-plus'
+import { useUserStore } from '@/stores/user'
+import { computed, reactive, ref } from 'vue'
+
+// 定义实时预览数据类型
+interface PreviewData {
+    w: number;
+    h: number;
+    div: {
+        width: string;
+        height: string;
+        overflow: string;
+    };
+    url: string;
+    img: {
+        width: string;
+        height: string;
+        transform: string;
+    };
+}
 
 const userStore = useUserStore()
 
 // 控制图片是否已选择
-const isImageSelected = ref(false)
+const isImageSelected = ref<boolean>(false)
 
 // 要上传图片的URL
 const imageUrl = ref(userStore.getUserAvatar())
 
-const upload = ref()
-const handleExceed = files => {
+const upload = ref<UploadInstance>()
+const handleExceed = (files: File[]): void => {
+    if (!upload.value) return
     upload.value.clearFiles()
-    const file = files[0]
+    const file: any = files[0]
     file.uid = genFileId()
-    upload.value.handleStart(file)
+    upload.value?.handleStart(file as any)
 }
-const handleChange = (file, fileList) => {
-    if (fileList.length > 0) {
+const handleChange = (file: UploadFile, fileList: UploadFiles) => {
+    if (fileList.length > 0 && file.raw) {
         // 获取图片地址
         imageUrl.value = URL.createObjectURL(file.raw)
-        isImageSelected.value ? '' : isImageSelected.value = true
+        isImageSelected.value = true
         console.log(imageUrl.value)
     }
 }
@@ -32,9 +50,34 @@ const handleChange = (file, fileList) => {
 
 const cropperRef = ref()   // 获取Dom元素 裁剪组件
 
+// 裁剪组件配置
+interface CropperOption {
+    img: string;
+    outputSize: number;
+    outputType: 'jpeg' | 'png' | 'webp';
+    info: boolean;
+    canScale: boolean;
+    autoCrop: boolean;
+    autoCropWidth: number;
+    autoCropHeight: number;
+    fixed: boolean;
+    fixedNumber: [number, number];
+    full: boolean;
+    fixedBox: boolean;
+    canMove: boolean;
+    canMoveBox: boolean;
+    original: boolean;
+    centerBox: boolean;
+    high: boolean;
+    infoTrue: boolean;
+    enlarge: number;
+    limitMinSize: [number, number];
+    mode: string;
+}
+
 // 裁剪组件的相关配置
-const option = reactive({
-    img: imageUrl,                  // 裁剪图片的地址
+const option = reactive<CropperOption>({
+    img: imageUrl.value,                  // 裁剪图片的地址
     outputSize: 1,                  // 裁剪生成图片的质量(可选0.1 - 1)
     outputType: "jpeg",             // 裁剪生成图片的格式（jpeg || png || webp）
     info: false,                    // 图片大小信息
@@ -59,22 +102,25 @@ const option = reactive({
 })
 
 // 实时预览图片
-const previews = ref({})
-const realTime = data => {
+const previews = ref<PreviewData>({} as PreviewData)
+const realTime = (data: PreviewData): void => {
     previews.value = data
 }
-const getPreviewStyle = computed(() => {
-    return {
-        'width': previews.value.w + 'px',
-        'height': previews.value.h + 'px',
-        'overflow': 'hidden',
-    }
-})
+const getPreviewStyle = computed(() => ({
+
+    'width': `${previews.value.w}px`,
+    'height': `${previews.value.h}px`,
+    'overflow': 'hidden',
+}))
 
 // 获取截图的 blob 数据
-const getCropBlobAsync = () => {
+const getCropBlobAsync = (): Promise<Blob> => {
     return new Promise((resolve, reject) => {
-        cropperRef.value.getCropBlob((data) => {
+        if (!cropperRef.value) {
+            reject(new Error('裁剪组件未挂载'))
+            return
+        }
+        cropperRef.value.getCropBlob((data: Blob) => {
             if (data) {
                 resolve(data);  // 成功获取到数据，resolve 返回数据
             } else {
@@ -83,11 +129,6 @@ const getCropBlobAsync = () => {
         })
     })
 }
-
-// 获取截图的 base64 数据
-// cropperRef.value.getCropData(data => {
-//     console.log(data)
-// })
 
 // 头像上传方法 (采用同时上传方法)
 const uploadAvatar = async () => {
@@ -128,8 +169,8 @@ const uploadAvatar = async () => {
                         :fixed="option.fixed" :fixed-number="option.fixedNumber" :full="option.full"
                         :fixed-box="option.fixedBox" :can-move="option.canMove" :can-move-box="option.canMoveBox"
                         :original="option.original" :center-box="option.centerBox" :info-true="option.infoTrue"
-                        :max-img-size="option.maxImgSize" :enlarge="option.enlarge"
-                        :limit-min-size="option.limitMinSize" :mode="option.mode" @realTime="realTime">
+                        :enlarge="option.enlarge" :limit-min-size="option.limitMinSize" :mode="option.mode"
+                        @realTime="realTime">
                     </VueCropper>
                 </div>
                 <el-upload ref="upload" :limit="1" :on-exceed="handleExceed" :on-change="handleChange"
@@ -146,7 +187,7 @@ const uploadAvatar = async () => {
             <!-- 实时预览图 -->
             <div class="avatar-preview-wrap">
                 <div v-show="!isImageSelected" class="current-avatar">
-                    <img :src="`http://localhost:8080/avatar/${imageUrl}`" alt="">
+                    <img :src="`http://localhost:8080/avatar/${encodeURIComponent(imageUrl)}`" alt="">
                 </div>
 
                 <div v-show="isImageSelected" class="current-avatar" :style="getPreviewStyle">

@@ -1,12 +1,12 @@
-<script setup>
-import { getBaseUrl } from '@/main';
-import { useUserStore } from '@/stores/user';
-import { ref } from 'vue';
+<script setup lang="ts">
+import { getBaseUrl } from '@/main'
+import { useUserStore } from '@/stores/user'
+import { ref } from 'vue'
 
 const userStore = useUserStore()
 
-const isCommenting = ref(false)
-const comment = ref('')                         // 要发布的内容
+const isCommenting = ref<boolean>(false)
+const comment = ref<string>('')                         // 要发布的内容
 const postComment = () => {
     console.log(comment.value)
 

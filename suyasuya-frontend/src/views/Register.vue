@@ -1,18 +1,18 @@
-<script setup>
+<script setup lang="ts">
 defineOptions({
     name: 'Register'
 })
 
-import { codeRegister } from '@/api/register';
-import GetCaptchaBtn from '@/components/GetCaptchaBtn.vue';
-import router from '@/router';
-import { ElMessage } from 'element-plus';
+import GetCaptchaBtn from '@/components/GetCaptchaBtn.vue'
+import { codeRegister } from '@/api/register'
+import { ElMessage } from 'element-plus'
+import router from '@/router'
 import { ref } from 'vue'
-const username = ref('')
-const password = ref('')
-const confirmPassword = ref('')
-const email = ref('')
-const captcha = ref('')
+const username = ref<string>('')
+const password = ref<string>('')
+const confirmPassword = ref<string>('')
+const email = ref<string>('')
+const captcha = ref<string>('')
 
 const register = async () => {
     if (!username.value) {

@@ -1,6 +1,6 @@
-<script setup>
-import { clearHistory, deleteWatchHistory, getWatchHistory } from '@/api/watchHistory'
+<script setup lang="ts">
 import LargeVideoBox from '@/components/LargeVideoBox.vue'
+import { clearHistory, deleteWatchHistory, getWatchHistory } from '@/api/watchHistory'
 import { ElMessage } from 'element-plus'
 import { onMounted, ref } from 'vue'
 
@@ -9,13 +9,13 @@ defineOptions({
 })
 
 // 分页组件相关信息
-const currentPage = ref(1)      // 当前页数
-const pages = ref(1)            // 总页数
-const size = ref(16)            // 每页的视频个数
-const total = ref(1)            // 总视频个数
+const currentPage = ref<number>(1)      // 当前页数
+const pages = ref<number>(1)            // 总页数
+const size = ref<number>(16)            // 每页的视频个数
+const total = ref<number>(1)            // 总视频个数
 
 
-const handelCurrentChange = page => {
+const handelCurrentChange = (page: number) => {
     currentPage.value = page
     getHistoryVideos()
     console.log(currentPage.value)
@@ -42,7 +42,7 @@ const getHistoryVideos = async () => {
 }
 
 // 清空历史记录方法
-const deleteHistory = async videoId => {
+const deleteHistory = async (videoId: number) => {
     const res = await deleteWatchHistory(videoId)
     console.log(res)
     if (res.success) {
@@ -72,21 +72,21 @@ const clearAllHistory = async () => {
     }
 }
 
-const formatWatchTime = watchTime => {
-    const date = new Date(watchTime)
-    const now = new Date()
+const formatWatchTime = (watchTime: number) => {
+    const date: Date = new Date(watchTime)
+    const now: Date = new Date()
 
     // 创建对比用的日期（去掉时间部分）
-    const createDateWithoutTime = d => new Date(d.getFullYear(), d.getMonth(), d.getDate())
+    const createDateWithoutTime = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
 
     // 获取对比日期
-    const currentDate = createDateWithoutTime(now)
-    const watchDate = createDateWithoutTime(date)
-    const yesterdayDate = new Date(currentDate)
+    const currentDate: Date = createDateWithoutTime(now)
+    const watchDate: Date = createDateWithoutTime(date)
+    const yesterdayDate: Date = new Date(currentDate)
     yesterdayDate.setDate(yesterdayDate.getDate() - 1)
 
     // 格式时间部分
-    const formatTime = d => {
+    const formatTime = (d: Date) => {
         const hours = String(d.getHours()).padStart(2, '0')
         const minutes = String(d.getMinutes()).padStart(2, '0')
         return `${hours}:${minutes}`

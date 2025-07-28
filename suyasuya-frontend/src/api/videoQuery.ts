@@ -2,17 +2,17 @@
 
 import request from "@/utils/request";
 
-export const getRandomVideos = count =>
+export const getRandomVideos = (count: number) =>
     request.get(`/videos/random?count=${count}`)
 
-export const getCategoryVideos = (categoryId, count) =>
+export const getCategoryVideos = (categoryId: number, count: number) =>
     request.get(`/videos/category/${categoryId}?count=${count}`)
 
-export const getVideosByUserByUploadTime = (userId, pageNum, pageSize) =>
+export const getVideosByUserByUploadTime = (userId: number, pageNum: number, pageSize: number) =>
     request.post(`/videos/getVideosByUserByUploadTime?userId=${userId}&pageNum=${pageNum}&pageSize=${pageSize}`)
 
-export const getVideosByUserByViewCount = (userId, pageNum, pageSize) =>
+export const getVideosByUserByViewCount = (userId: number, pageNum: number, pageSize: number) =>
     request.post(`/videos/getVideosByUserByViewCount?userId=${userId}&pageNum=${pageNum}&pageSize=${pageSize}`)
 
-export const getVideosByUserByCollectionCount = (userId, pageNum, pageSize) =>
+export const getVideosByUserByCollectionCount = (userId: number, pageNum: number, pageSize: number) =>
     request.post(`/videos/getVideosByUserByCollectionCount?userId=${userId}&pageNum=${pageNum}&pageSize=${pageSize}`)

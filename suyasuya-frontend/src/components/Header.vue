@@ -1,12 +1,11 @@
-<script setup>
+<script setup lang="ts">
 defineOptions({
     name: 'Header'
 })
 import SearchBox from '@/components/SearchBox.vue'
-import { getBaseUrl } from '@/main';
-import { useUserStore } from '@/stores/user';
-import { onMounted } from 'vue';
-import { RouterLink } from 'vue-router';
+import { getBaseUrl } from '@/main'
+import { useUserStore } from '@/stores/user'
+import { RouterLink } from 'vue-router'
 
 const userStore = useUserStore()
 

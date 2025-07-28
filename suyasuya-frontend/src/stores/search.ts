@@ -1,22 +1,22 @@
-import { searchVideosByKeyword } from "@/api/search";
-import { defineStore } from "pinia";
-import { ref } from "vue";
-import { useUserStore } from "./user";
+import { searchVideosByKeyword } from "@/api/search"
+import { defineStore } from "pinia"
+import { Ref, ref } from "vue"
+import { ElMessage } from "element-plus"
 
 // 此仓库用于定义搜索相关属性和方法，便于非层级关系组件间互相传值和调用（映射组件：SearchVideo）
 export const useSearchStore = defineStore('search', () => {
 
-    const keyword = ref('')
-    const sortType = ref('')
+    const keyword = ref<string>('')
+    const sortType = ref<string>('')
     const searchResults = ref()
 
     // 分页组件相关信息
-    const currentPage = ref(1)      // 当前页数
-    const pages = ref(1)            // 总页数
-    const size = ref(16)            // 每页的视频个数
-    const total = ref(1)            // 总视频个数
+    const currentPage = ref<number>(1)      // 当前页数
+    const pages = ref<number>(1)            // 总页数
+    const size = ref<number>(16)            // 每页的视频个数
+    const total = ref<number>(1)            // 总视频个数
 
-    const setKeyword = value => {
+    const setKeyword = (value: string) => {
         keyword.value = value
     }
 
@@ -37,13 +37,13 @@ export const useSearchStore = defineStore('search', () => {
         }
     }
 
-    const changeVideosSortord = type => {
+    const changeVideosSortord = (type: string) => {
         sortType.value = type
         console.log(sortType.value)
         searchVideos()
     }
 
-    const handelCurrentChange = page => {
+    const handelCurrentChange = (page: number) => {
         currentPage.value = page
         searchVideos()
         console.log(currentPage.value)

@@ -1,34 +1,36 @@
-import { fileURLToPath, URL } from 'node:url'
-
-import { defineConfig, loadEnv } from 'vite'
+import { ConfigEnv, defineConfig, loadEnv, ProxyOptions } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
-
+import path from 'node:path'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 import Icons from 'unplugin-icons/vite'
 import IconsResolver from 'unplugin-icons/resolver'
-
 // https://vite.dev/config/
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(({ command, mode }: ConfigEnv) => {
   // 加载环境变量（根据当前 mode 加载对应 .env 文件）
   const env = loadEnv(mode, process.cwd(), '')
-
+  // 创建代理配置函数
+  const createProxy = (): Record<string, ProxyOptions> | undefined => {
+    if (env.VITE_DEBUG_MODE === 'true') {                   // 设置开发环境代理
+      return {
+        '/api': {                                           // 设置拦截器格式（斜杠+拦截器名字），名字可以自定义
+          target: env.VITE_API_BASE_URL,                    // 代理的目标地址(后端设置的端口号)
+          changeOrigin: true,                               // 是否设置同源
+          rewrite: path => path.replace(/^\/api/, '')       // 重定向
+        }
+      }
+    }
+    return undefined
+  }
   return {
     // 区分生产环境路径和开发环境路径
-    base: env.VITE_BASE_URL || '/',       // 使用逻辑或确保并发环境正常工作
+    base: env.VITE_BASE_URL || '/',                       // 使用逻辑或确保并发环境正常工作
     // 根据环境配置代理
     server: {
       port: 5173,                                         // 设置开发环境前端端口，选填
-      proxy: env.VITE_DEBUG_MODE === 'true' ? {           // 设置开发环境代理
-        '/api': {                                         // 设置拦截器格式（斜杠+拦截器名字），名字可以自定义
-          target: env.VITE_API_BASE_URL,                  // 代理的目标地址(后端设置的端口号)
-          changeOrigin: true,                             // 是否设置同源
-          rewrite: path => path.replace(/^\/api/, '')     // 重定向
-        }
-      } : {}
+      proxy: createProxy()                                // 使用代理配置函数
     },
     build: {
       sourcemap: env.VITE_DEBUG_MODE === 'true'
@@ -59,8 +61,9 @@ export default defineConfig(({ command, mode }) => {
     ],
     resolve: {
       alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url))
+        '@': path.resolve(__dirname, './src'), // 设置 @ 符号指向 src 目录
       },
+      extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
     },
 
     minify: env.VITE_DEBUG_MODE === 'true' ? false : 'terser', // 生产环境开启压缩

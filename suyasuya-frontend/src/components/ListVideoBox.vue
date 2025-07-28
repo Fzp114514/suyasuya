@@ -1,5 +1,7 @@
-<script setup>
-import { formatVideoDuration, getBaseUrl } from '@/main';
+<script setup lang="ts">
+import { formatVideoDuration, getBaseUrl } from '@/main'
+
+
 
 const props = defineProps({
     videosMsg: Object

@@ -1,21 +1,21 @@
-<script setup>
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { usekeywordsStore } from '@/stores/keywords';
-import router from '@/router';
-import { useSearchStore } from '@/stores/search';
+<script setup lang="ts">
+import router from '@/router'
+import { usekeywordsStore } from '@/stores/keywords'
+import { useSearchStore } from '@/stores/search'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const keywordsStore = usekeywordsStore()
 const searchStore = useSearchStore()
 
 // 搜索模块相关方法
 const isShowSearchPanel = ref(false)
-const hoveredItemIndex = ref(null)      // 记录当前悬停的历史项索引
+const hoveredItemIndex = ref<number | null>(null)      // 记录当前悬停的历史项索引
 
 // 获取Dom元素 search_box
-const searchBox = ref(null)
+const searchBox = ref<HTMLElement | null>(null)
 // 隐藏搜索面板方法     注意：要阻止remove-icon所触发的事件的传递，否则会引发逻辑冲突
-const handleClickOutside = e => {
-    if (searchBox.value && !searchBox.value.contains(e.target)) {
+const handleClickOutside = (e: Event) => {
+    if (searchBox.value && !(searchBox.value as HTMLElement).contains(e.target as Node)) {
         isShowSearchPanel.value = false
     }
 }
@@ -35,13 +35,13 @@ const clearKeywords = () => {
     keywordsStore.clearKeywords()
     isShowSearchPanel.value = false
 }
-const removeKeywordByIndex = index => {
+const removeKeywordByIndex = (index: number) => {
     keywordsStore.removeKeywordByIndex(index)
     if (keywordsStore.getKeywordsLength() === 0) isShowSearchPanel.value = false
 }
 
 // 搜索方法
-const search = keyword => {
+const search = (keyword: string) => {
     if (!keyword || !keyword.trim()) {
         return
     }

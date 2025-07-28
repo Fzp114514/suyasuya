@@ -1,32 +1,36 @@
-import { getUserInfo, updateAnnouncement, updateSignature } from "@/api/userInfo";
+
+
+import { getUserInfo, updateAnnouncement, updateSignature } from "@/api/userInfo"
 import { ElMessage } from "element-plus";
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { Ref, ref } from "vue";
 
 export const useUserStore = defineStore('user', () => {
-    // const userInfo = ref({
-    //     userId: 114514,
-    //     userName: '时与空',
-    //     gender: '保密',
-    //     birthday: '07-22',
-    //     avatar: '../../../public/imgs/avatar/avatar1.jpg',
-    //     signature: '起风了，唯有努力生存。',
-    //     announcement: '苟利星奏生死以，岂因新岛避趋之。'
-    // })
-    const userInfo = ref({})
+    interface UserInfo {
+        [key: string]: any
+    }
+    const userInfo = ref<UserInfo>({
+        userId: null,
+        userName: null,
+        gender: null,
+        birthday: null,
+        avatar: null,
+        signature: null,
+        announcement: null
+    })
     const getUserId = () => userInfo.value.userId
     const getUserName = () => userInfo.value.userName
     const getUserBirthday = () => userInfo.value.birthday
     const getUserAvatar = () => userInfo.value.avatar
     const getSignature = () => userInfo.value.signature
     const getAnnouncement = () => userInfo.value.announcement
-    const clearUserInfo = () => userInfo.value = null
+    const clearUserInfo = () => userInfo.value = {}
 
     // 异步操作
 
-    const setUserInfo = value => userInfo.value = value
+    const setUserInfo = (value: UserInfo) => userInfo.value = value
 
-    const setSignature = async signature => {
+    const setSignature = async (signature: string) => {
         const res = await updateSignature(signature)
         console.log(res)
         if (res.success) {
@@ -43,7 +47,7 @@ export const useUserStore = defineStore('user', () => {
             })
         }
     }
-    const setAnnouncement = async announcement => {
+    const setAnnouncement = async (announcement: string) => {
         const res = await updateAnnouncement(announcement)
         if (res.success) {
             userInfo.value.announcement = announcement

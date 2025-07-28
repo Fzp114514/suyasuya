@@ -1,11 +1,17 @@
-<script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+
+defineSlots<{
+    // 声明 otherBtn 插槽
+    otherBtn?: (props: any) => any
+}>()
 
 // 置顶按钮显示位置
-const topBtnShowPosition = ref(200)
-const isShowTopBtn = ref(false)
+const topBtnShowPosition = ref<number>(200)
+const isShowTopBtn = ref<boolean>(false)
 const handelScroll = () => {
-    const currentPosition = window.scrollY
+    const currentPosition: number = window.scrollY
+
     if (currentPosition > topBtnShowPosition.value) {
         isShowTopBtn.value = true
     }

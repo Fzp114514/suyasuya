@@ -1,44 +1,44 @@
-<script setup>
-import { publishVideo, uploadTemporarilyVideo } from '@/api/videoSubmit';
-import SecurityRightTitle from '@/components/SecurityRightTitle.vue';
-import { useUserStore } from '@/stores/user';
-import { ElMessage } from 'element-plus';
-import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+<script setup lang="ts">
+import SecurityRightTitle from '@/components/SecurityRightTitle.vue'
+import { publishVideo, uploadTemporarilyVideo } from '@/api/videoSubmit'
+import { ElMessage, genFileId, InputInstance, UploadFile, UploadFiles, UploadInstance } from 'element-plus'
+import { useUserStore } from '@/stores/user'
+import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 
 const userStore = useUserStore()
 // 状态控制
-const isUploading = ref(false)          // 是否正在上传视频,暂时设置为true
-const isTitleFocus = ref(false)         // 标题输入框是否被选中
-const isIntroductionFocus = ref(false)  // 视频简介是否被选中
-const uploadProgress = ref(0)           // 视频上传进度
+const isUploading = ref<boolean>(false)          // 是否正在上传视频,暂时设置为true
+const isTitleFocus = ref<boolean>(false)         // 标题输入框是否被选中
+const isIntroductionFocus = ref<boolean>(false)  // 视频简介是否被选中
+const uploadProgress = ref<number>(0)            // 视频上传进度
 
 // 要上传的表单数据
-const video_id = ref('')                // 视频id
-const croppedCoverFile = ref('')        // 裁剪封面blob数据
-const video_title = ref('')             // 视频标题
-const video_categorieId = ref('')       // 视频分类id
-const videoTags = ref([])               // 视频标签
-const video_introduction = ref('')      // 视频简介
+const video_id = ref<number>()                   // 视频id
+const croppedCoverFile = ref<Blob>()             // 裁剪封面blob数据
+const video_title = ref<string>('')              // 视频标题
+const video_categorieId = ref<number>()          // 视频分类id
+const videoTags = ref<Array<string>>([])         // 视频标签
+const video_introduction = ref<string>('')       // 视频简介
 
-const submitConfirmDialog = ref(false)  // 视频投稿确认弹窗
+const submitConfirmDialog = ref<boolean>(false)  // 视频投稿确认弹窗
 
 // 视频信息校验方法
 const videoInfoCheck = () => {
-    if (video_id.value === '') {
+    if (!video_id.value) {
         ElMessage({
             message: '请等待视频上传成功',
             type: 'error'
         })
         return
     }
-    if (croppedCoverFile.value === '') {
+    if (!croppedCoverFile.value) {
         ElMessage({
             message: '请选择视频封面',
             type: 'error'
         })
         return
     }
-    if (video_title.value === '') {
+    if (!video_title.value) {
         ElMessage({
             message: '请输入视频标题',
             type: 'error'
@@ -57,55 +57,72 @@ const videoInfoCheck = () => {
 
 // 视频上传方法
 const submitVideo = async () => {
-    const formData = new FormData()
-    formData.append('videoId', video_id.value)
-    formData.append('coverFile', croppedCoverFile.value, 'cover.jpeg')
-    formData.append('title', video_title.value)
-    formData.append('categoryId', video_categorieId.value)
-    formData.append('tags', videoTags.value)
-    formData.append('introduction', video_introduction.value)
-    const res = await publishVideo(formData)
-    if (res.success) {
-        video_id.value = ''
-        croppedCoverFile.value = ''
-        video_title.value = ''
-        video_categorieId.value = ''
-        videoTags.value = []
-        video_introduction.value = ''
-        uploadProgress.value = 0
-        video_categorie.value = ''
-        croppedCoverUrl.value = null
-        isCoverSelected.value = false
-        isUploading.value = false
+    try {
+        if (!video_id.value || !croppedCoverFile.value || !video_categorieId.value) {
+            ElMessage({
+                message: '请填写完整的视频信息',
+                type: 'error'
+            });
+            return;
+        }
+        const formData = new FormData()
+        formData.append('videoId', video_id.value.toString())
+        formData.append('coverFile', croppedCoverFile.value, 'cover.jpeg')
+        formData.append('title', video_title.value)
+        formData.append('categoryId', video_categorieId.value.toString())
+        formData.append('tags', videoTags.value.join(','))
+        formData.append('introduction', video_introduction.value)
+        const res = await publishVideo(formData)
+        if (res.success) {
+            video_id.value = undefined
+            croppedCoverFile.value = undefined
+            video_title.value = ''
+            video_categorieId.value = undefined
+            videoTags.value = []
+            video_introduction.value = ''
+            uploadProgress.value = 0
+            video_categorie.value = ''
+            croppedCoverUrl.value = ''
+            isCoverSelected.value = false
+            isUploading.value = false
+            ElMessage({
+                message: res.message,
+                type: 'success'
+            })
+        }
+        else {
+            ElMessage({
+                message: res.message,
+                type: 'error'
+            })
+            console.log(res)
+        }
+    } catch (error) {
+        console.log("视频投稿失败", error)
         ElMessage({
-            message: res.message,
-            type: 'success'
-        })
-    }
-    else {
-        ElMessage({
-            message: res.message,
+            message: '视频投稿失败，请重试',
             type: 'error'
         })
-        console.log(res)
+    } finally {
+        submitConfirmDialog.value = false
     }
-    submitConfirmDialog.value = false
 }
 
 
 // ================= 其余处理逻辑 ===========================
 
-const videoUrl = ref('')
+const videoUrl = ref<string>('')
 // 视频上传方法
-const uploadVideo = async uploadFile => {
-    if (uploadFile) {
+const uploadVideo = async (uploadFile: UploadFile) => {
+    try {
+        if (!uploadFile || !uploadFile.raw) return
         isUploading.value = true
         const file = uploadFile.raw
         // 创建表单对象
         const formData = new FormData()
         formData.append('file', file)
         // 调用接口上传临时视频
-        const res = await uploadTemporarilyVideo(formData, percent => {
+        const res = await uploadTemporarilyVideo(formData, (percent: number) => {
             uploadProgress.value = percent  //更新上传进度
         })
         console.log(res)
@@ -123,24 +140,31 @@ const uploadVideo = async uploadFile => {
                 type: 'error'
             })
         }
+    } catch (error) {
+        console.log('视频上传失败，请重试', error)
+        ElMessage({
+            message: '视频上传失败,请重试',
+            type: 'error'
+        })
     }
 }
 
 // 封面上传相关方法
 
-const coverUploader = ref()             // 获取Dom元素 el-upload
-const coverUrl = ref('')                // 要上传封面的URL
-const isCropDialog = ref(false)         // 裁剪弹窗显示状态
-const isCoverSelected = ref(false)      // 是否已经选择视频封面（用于控制封面上传组件是否显示）
+const coverUploader = ref<UploadInstance>()             // 获取Dom元素 el-upload
+const coverUrl = ref<string>('')                // 要上传封面的URL
+const isCropDialog = ref<boolean>(false)         // 裁剪弹窗显示状态
+const isCoverSelected = ref<boolean>(false)      // 是否已经选择视频封面（用于控制封面上传组件是否显示）
 
-const handleExceed = files => {
+const handleExceed = (files: File[]) => {
+    if (!coverUploader.value) return
     coverUploader.value.clearFiles()
-    const file = files[0]
+    const file: any = files[0]
     file.uid = genFileId()
     coverUploader.value.handleStart(file)
 }
-const getCoverUrl = (file, fileList) => {
-    if (fileList.length > 0) {
+const getCoverUrl = (file: UploadFile, fileList: UploadFiles) => {
+    if (fileList.length > 0 && file.raw) {
         // 获取图片地址
         coverUrl.value = URL.createObjectURL(file.raw)
         isCropDialog.value = true
@@ -148,7 +172,7 @@ const getCoverUrl = (file, fileList) => {
 }
 
 const cropperRef = ref()            // 获取Dom元素 裁剪组件
-const croppedCoverUrl = ref()       // 裁剪图url
+const croppedCoverUrl = ref<string>()       // 裁剪图url
 
 // 裁剪组件的相关配置
 const option = reactive({
@@ -179,44 +203,61 @@ const option = reactive({
 // 关闭裁剪弹窗触发事件
 const closeCropDialog = () => {
     isCropDialog.value ? isCropDialog.value = false : ''
-    coverUploader.value.clearFiles()
+    if (coverUploader.value) {
+        coverUploader.value.clearFiles();
+    }
     coverUrl.value = ''
 }
 // 保存截图方法
 const savaCroppedCover = async () => {
-    // 获取裁剪图片文件及其地址
-    croppedCoverFile.value = await getCropBlobAsync()
-    croppedCoverUrl.value = URL.createObjectURL(croppedCoverFile.value)
-    console.log(croppedCoverUrl.value)
-    isCoverSelected.value ? '' : isCoverSelected.value = true
-    isCropDialog.value = false
+    try {
+        if (!cropperRef.value) {
+            throw new Error('裁剪组件未初始化')
+        }
+        // 获取裁剪图片文件及其地址
+        const blob = await getCropBlobAsync()
+        croppedCoverFile.value = blob
+        croppedCoverUrl.value = URL.createObjectURL(blob)
+        isCoverSelected.value = true
+        isCropDialog.value = false
+    } catch (error) {
+        console.error('保存封面失败:', error)
+        ElMessage({
+            message: '保存封面失败，请重试',
+            type: 'error'
+        })
+    }
 }
 
 // 获取截图的 blob 数据
-const getCropBlobAsync = () => {
+const getCropBlobAsync = (): Promise<Blob> => {
     return new Promise((resolve, reject) => {
-        cropperRef.value.getCropBlob((data) => {
+        cropperRef.value.getCropBlob((data: Blob | null) => {
             if (data) {
-                resolve(data);  // 成功获取到数据，resolve 返回数据
+                resolve(data)  // 成功获取到数据，resolve 返回数据
             } else {
-                reject(new Error('无法获取裁剪后的图片数据'));  // 如果获取失败，reject
+                reject(new Error('无法获取裁剪后的图片数据'))  // 如果获取失败，reject
             }
         })
     })
 }
 
 // 视频标签相关设置
-const tagInputValue = ref('')
-const tagInputVisible = ref(false)
-const tagInputRef = ref(null)
+const tagInputValue = ref<string>('')
+const tagInputVisible = ref<boolean>(false)
+const tagInputRef = ref<InputInstance>()
 
-const handleClose = (tag) => {
-    videoTags.value.splice(videoTags.value.indexOf(tag), 1)
+const handleClose = (tag: string) => {
+    const index = videoTags.value.indexOf(tag)
+    if (index !== -1) {
+        videoTags.value.splice(index, 1)
+    }
 }
 const showInput = () => {
     tagInputVisible.value = true
     nextTick(() => {
-        tagInputRef.value.input.focus()
+        if (tagInputRef.value && tagInputRef.value.input)
+            tagInputRef.value.input.focus()
     })
 }
 const handleInputConfirm = () => {
@@ -233,8 +274,14 @@ const handleInputConfirm = () => {
     tagInputValue.value = ''
 }
 
-const video_categorie = ref('')         // 视频类别
-const allCategories = ref([             // 所有视频分类（待修改）
+// 定义视频分类（待修改）
+interface Category {
+    value: string,
+    label: string,
+}
+
+const video_categorie = ref<string>('')         // 视频类别
+const allCategories = ref<Category[]>([             // 所有视频分类（待修改）
     {
         value: '学习',
         label: '学习',
@@ -287,7 +334,7 @@ const needWarning = () => {
 }
 
 // 浏览器原生事件监听
-const handleBeforeUnload = (e) => {
+const handleBeforeUnload = (e: BeforeUnloadEvent) => {
     if (needWarning()) {
         e.preventDefault()
         e.returnValue = '您有未保存的更改，确定离开吗？' // 兼容旧浏览器
@@ -395,8 +442,7 @@ onBeforeUnmount(() => {
                 :auto-crop-height="option.autoCropHeight" :fixed="option.fixed" :fixed-number="option.fixedNumber"
                 :full="option.full" :fixed-box="option.fixedBox" :can-move="option.canMove"
                 :can-move-box="option.canMoveBox" :original="option.original" :center-box="option.centerBox"
-                :info-true="option.infoTrue" :max-img-size="option.maxImgSize" :enlarge="option.enlarge"
-                :limit-min-size="option.limitMinSize" :mode="option.mode">
+                :info-true="option.infoTrue" :enlarge="option.enlarge" :mode="option.mode">
             </VueCropper>
         </div>
         <template #footer>

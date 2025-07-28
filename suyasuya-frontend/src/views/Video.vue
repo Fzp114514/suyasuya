@@ -1,28 +1,28 @@
-<script setup>
+<script setup lang="ts">
 defineOptions({
     name: 'Video'
 })
-import { useRoute } from 'vue-router';
-import Header from '@/components/Header.vue';
-import { nextTick, onMounted, ref } from 'vue';
-import VideoPlayer from '@/components/VideoPlayer.vue';
-import { formatWrapText, formatUploadTime, formatUploadTimeDetail, formatViewCounts, getBaseUrl } from '@/main';
-import { useUserStore } from '@/stores/user';
-import PaletteBtn from '@/components/PaletteBtn.vue';
-import VideoComment from '@/components/VideoComment.vue';
-import CommentInputBox from '@/components/CommentInputBox.vue';
-import ListVideoBox from '@/components/ListVideoBox.vue';
-import { getRelatedRecommendVideos, getVideoDetail, getVideoTags } from '@/api/videoPlayback';
-import { ElMessage } from 'element-plus';
-import { recordWatchHistory } from '@/api/watchHistory';
-import { addVideoToCollection, checkVideoCollections, createCollection, getUserCollections, removeVideoFromCollection } from '@/api/collection';
+import { useRoute } from 'vue-router'
+import Header from '@/components/Header.vue'
+import { nextTick, onMounted, ref } from 'vue'
+import VideoPlayer from '@/components/VideoPlayer.vue'
+import PaletteBtn from '@/components/PaletteBtn.vue'
+import VideoComment from '@/components/VideoComment.vue'
+import CommentInputBox from '@/components/CommentInputBox.vue'
+import ListVideoBox from '@/components/ListVideoBox.vue'
+import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/stores/user'
+import { addVideoToCollection, checkVideoCollections, createCollection, getUserCollections, removeVideoFromCollection } from '@/api/collection'
+import { getRelatedRecommendVideos, getVideoDetail, getVideoTags } from '@/api/videoPlayback'
+import { recordWatchHistory } from '@/api/watchHistory'
+import { formatUploadTime, formatUploadTimeDetail, formatViewCounts, formatWrapText, getBaseUrl } from '@/main'
 
 const route = useRoute()
 const userStore = useUserStore()
 
-const titleElement = ref(null)                  // 获取Dom元素 titleElement
-const isShowOverflowPanel = ref(false)          // 标题隐藏面板显示状态
-const isTitleOverLimit = ref(null)              // 描述内容是否超过指定宽度
+const titleElement = ref<HTMLHeadElement | null>(null)                  // 获取Dom元素 titleElement
+const isShowOverflowPanel = ref<boolean>(false)          // 标题隐藏面板显示状态
+const isTitleOverLimit = ref<boolean | null>(null)              // 描述内容是否超过指定宽度
 
 const checkTitleOverflow = () => {
     nextTick(() => {
@@ -32,10 +32,10 @@ const checkTitleOverflow = () => {
     })
 }
 
-const descInfo = ref()                          // 获取Dom元素 descInfo
-const isShowDetailDesc = ref(false)             // 是否展开视频描述
-const isDescOverLimit = ref(false)              // 描述内容是否超过指定高度
-const toggleBtnText = ref('展示更多')
+const descInfo = ref<HTMLDivElement | null>()                          // 获取Dom元素 descInfo
+const isShowDetailDesc = ref<boolean>(false)             // 是否展开视频描述
+const isDescOverLimit = ref<Boolean>(false)              // 描述内容是否超过指定高度
+const toggleBtnText = ref<string>('展示更多')
 
 const checkDescOverflow = () => {
     nextTick(() => {
@@ -52,24 +52,37 @@ const showDetailDesc = () => {
 
 // ========================= 收藏模块相关方法 ====================================
 
-const isCollection = ref(false)                 // 是否为收藏视频
-const currentCollectionId = ref()               // 视频所处收藏夹的id（若为收藏视频）
+const isCollection = ref<boolean>(false)                            // 是否为收藏视频
+const currentCollectionId = ref<number | null>(null)                // 视频所处收藏夹的id（若为收藏视频）
 
-const collectionDialogVisible = ref(false)      // 收藏弹窗显示状态
-const isCreateCollection = ref(false)           // 是否新增收藏夹
-const newCollectionName = ref('')               // 新增收藏夹名字
-const radio = ref()                             // 单选框默认值
-const collectionsList = ref()                   // 收藏夹列表 
-const checkedCollectionId = ref()               // 选择的收藏夹id
+const collectionDialogVisible = ref<boolean>(false)                 // 收藏弹窗显示状态
+const isCreateCollection = ref<boolean>(false)                      // 是否新增收藏夹
+const newCollectionName = ref<string>('')                           // 新增收藏夹名字
+const radio = ref<number>()                                         // 单选框默认值
+interface CollectionItem {
+    collectionId: number;
+    collectionName: string;
+}
+
+const collectionsList = ref<CollectionItem[]>([
+    {
+        collectionId: 1,
+        collectionName: '默认收藏夹'
+    }
+])                        // 收藏夹列表 
+const checkedCollectionId = ref<number | null>(null)                // 选择的收藏夹id
 
 
 // 查询视频是否被用户收藏   注：接口可支持查询多个收藏夹，但受限于前端目前仅安排一个视频存一个收藏夹
 const checkVideo = async () => {
-    const res = await checkVideoCollections(route.params.videoId)
-    console.log(res)
-    if (res.data.length) {
-        isCollection.value = true
-        currentCollectionId.value = res.data[0].collectionId
+    const videoId = +route.params.videoId
+    if (!videoId) {
+        const res = await checkVideoCollections(videoId)
+        console.log(res)
+        if (res.data.length) {
+            isCollection.value = true
+            currentCollectionId.value = res.data[0].collectionId
+        }
     }
 }
 
@@ -93,7 +106,7 @@ const favouriteVideo = async () => {
     // isCollection.value = true
 }
 // 选择收藏夹方法
-const selectCollection = collectionId => {
+const selectCollection = (collectionId: number) => {
     checkedCollectionId.value = collectionId
     console.log(checkedCollectionId.value)
 }
@@ -125,7 +138,15 @@ const createNewCollection = async () => {
 
 // 插入视频到用户收藏夹方法
 const addVideo = async () => {
-    const res = await addVideoToCollection(checkedCollectionId.value, route.params.videoId)
+    if (!checkedCollectionId.value) {
+        ElMessage({
+            message: '请选择收藏夹',
+            type: 'error'
+        })
+        return
+    }
+    const videoId = +route.params.videoId
+    const res = await addVideoToCollection(checkedCollectionId.value, videoId)
     console.log(res)
     if (res.success) {
         ElMessage({
@@ -147,7 +168,15 @@ const addVideo = async () => {
 
 // 移除收藏视频方法 
 const unfavouriteVideo = async () => {
-    const res = await removeVideoFromCollection(currentCollectionId.value, route.params.videoId)
+    if (!currentCollectionId.value) {
+        ElMessage({
+            message: '当前视频未收藏',
+            type: 'error'
+        })
+        return
+    }
+    const videoId = +route.params.videoId
+    const res = await removeVideoFromCollection(currentCollectionId.value, videoId)
     console.log(res)
     if (res.success) {
         ElMessage({
@@ -155,7 +184,7 @@ const unfavouriteVideo = async () => {
             type: 'success'
         })
         videoInfo.value.collectionCount--
-        currentCollectionId.value = ''
+        currentCollectionId.value = null
         isCollection.value = false
     }
     else {
@@ -191,18 +220,23 @@ const isShowHotComments = ref(true)             // 是否展示最热评论, 值
 
 // 播放视频信息
 const videoInfo = ref({
-    authorInfo: {},
+    authorInfo: {
+        authorId: -1,
+        authorName: '',
+        avatar: '',
+        signature: ''
+    },
     videoId: -1,
     video: '',
     introduction: '',
-    cover: String,
-    uploadTime: Date,
-    title: String,
-    duration: Number,
-    collectionCount: Number,
-    likeCount: Number,
-    viewCount: Number,
-    commentCount: Number,
+    cover: '',
+    uploadTime: '',
+    title: '',
+    duration: 0,
+    collectionCount: 0,
+    likeCount: 0,
+    viewCount: 0,
+    commentCount: 0,
 })
 
 const videoTags = ref()             // 当前播放视频的所有标签
@@ -236,15 +270,18 @@ const showNewComments = () => {
     // 注：此处调用api获取最新评论
 }
 
+const videoId = +route.params.videoId
+
 // 获取视频详细信息方法
 const getVideoInfo = async () => {
-    const res = await getVideoDetail(route.params.videoId)
+    if (!videoId) return
+    const res = await getVideoDetail(videoId)
     console.log(res)
     if (res.success) {
         videoInfo.value = res.data
         checkTitleOverflow()
         checkDescOverflow()
-        const res2 = await recordWatchHistory(route.params.videoId)
+        const res2 = await recordWatchHistory(videoId)
         console.log(res2)
     }
     else {
@@ -256,7 +293,8 @@ const getVideoInfo = async () => {
 }
 // 获取当前视频的所有标签
 const getCurrentVideoTags = async () => {
-    const res = await getVideoTags(route.params.videoId)
+    if (!videoId) return
+    const res = await getVideoTags(videoId)
     if (res.success) {
         videoTags.value = res.data
     }
@@ -270,7 +308,7 @@ const getCurrentVideoTags = async () => {
 }
 // 获取相关视频推荐列表
 const getRelatedVideoList = async () => {
-    const res = await getRelatedRecommendVideos(route.params.videoId)
+    const res = await getRelatedRecommendVideos(videoId)
     console.log(res)
     if (res.success) {
         recommendedList.value = res.data
@@ -310,7 +348,7 @@ onMounted(() => {
                                     <div class="icon"><el-icon><i-ep-VideoPlay /></el-icon></div>
                                     <span>{{ videoInfo.viewCount }}</span>
                                 </div>
-                                <div class="creativeTime">{{ formatUploadTimeDetail(videoInfo.uploadTime) }}</div>
+                                <div class="creativeTime">{{ formatUploadTimeDetail(+videoInfo.uploadTime) }}</div>
                             </div>
                         </div>
                     </div>
@@ -319,7 +357,7 @@ onMounted(() => {
                             <div class="icon"><el-icon><i-ep-VideoPlay /></el-icon></div>
                             <span>{{ videoInfo.viewCount }}</span>
                         </div>
-                        <div class="creativeTime">{{ formatUploadTimeDetail(videoInfo.uploadTime) }}</div>
+                        <div class="creativeTime">{{ formatUploadTimeDetail(+videoInfo.uploadTime) }}</div>
                     </div>
                 </div>
                 <VideoPlayer :videoUrl="videoInfo.video" :videoId="videoInfo.videoId"></VideoPlayer>
@@ -439,15 +477,15 @@ onMounted(() => {
                 <ul>
                     <li v-for="(item, index) in collectionsList" :key="index">
                         <input v-model="radio" @click="selectCollection(item.collectionId)" type="radio"
-                            name="collection" :id="index" class="checkBtn" :value="index">
-                        <label :for="index" class="label">
+                            name="collection" :id="String(index)" class="checkBtn" :value="index">
+                        <label :for="String(index)" class="label">
                             {{ item.collectionName }}</label>
                     </li>
                 </ul>
             </div>
             <div class="container">
-                <input v-model="newCollectionName" @focus="isCreateCollection = true" @click="showCreateComp = true"
-                    placeholder="新建收藏夹" class="createCollections" type="text" @keyup.enter="createNewCollection" />
+                <input v-model="newCollectionName" @focus="isCreateCollection = true" placeholder="新建收藏夹"
+                    class="createCollections" type="text" @keyup.enter="createNewCollection" />
                 <button v-show="isCreateCollection" @click="createNewCollection" class="createBtn">确定</button>
             </div>
         </div>

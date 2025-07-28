@@ -1,14 +1,19 @@
-<script setup>
-import { useSearchStore } from '@/stores/search';
-import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useSearchStore } from '@/stores/search'
 
 const searchStore = useSearchStore()
 
 const route = useRoute()
 
 onMounted(() => {
-    searchStore.setKeyword(route.params.keyword)
+    // 确保 keyword 是字符串类型
+    const keyword = Array.isArray(route.params.keyword)
+        ? route.params.keyword[0]
+        : route.params.keyword;
+
+    searchStore.setKeyword(String(keyword))
     searchStore.searchVideos()
 })
 </script>

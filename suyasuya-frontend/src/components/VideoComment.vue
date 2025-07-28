@@ -1,6 +1,7 @@
-<script setup>
-import { formatWrapText } from '@/main';
-import { useUserStore } from '@/stores/user';
+<script setup lang="ts">
+import { formatWrapText } from '@/main'
+import { useUserStore } from '@/stores/user'
+
 
 const userStore = useUserStore()
 
@@ -8,7 +9,7 @@ const props = defineProps({
     commentContents: Object
 })
 
-const likeComment = (commentId, islike) => {
+const likeComment = (commentId: number, islike: boolean) => {
     console.log(commentId, islike)
     if (islike) {
         // 此处调用api将点赞评论信息存储进数据库

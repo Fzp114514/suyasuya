@@ -1,25 +1,25 @@
-<script setup>
+<script setup lang="ts">
 defineOptions({
     name: 'Login'
 })
 
 import { ElMessage } from 'element-plus'
 import { onMounted, ref } from 'vue'
-import router from '@/router'
-import { useDisplayStore } from '@/stores/display'
 import GetCaptchaBtn from '@/components/GetCaptchaBtn.vue'
-import { loginByCaptcha, loginByPassword } from '@/api/login'
+import { useDisplayStore } from '@/stores/display'
 import { useUserStore } from '@/stores/user'
+import { loginByCaptcha, loginByPassword } from '@/api/login'
 import { getUserInfo } from '@/api/userInfo'
+import router from '@/router'
 
 const displayStore = useDisplayStore()
 const userStore = useUserStore()
-const password = ref('')
-const email = ref('')
-const captcha = ref('')
+const password = ref<string>('')
+const email = ref<string>('')
+const captcha = ref<string>('')
 
 const emailReg = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/    // 邮箱正则
-const isUseCaptchaLogin = ref(false)     //是否使用验证码登录
+const isUseCaptchaLogin = ref<boolean>(false)     //是否使用验证码登录
 const changeLoginMode = () => {
     isUseCaptchaLogin.value = !isUseCaptchaLogin.value
     displayStore.changeLoginMode()

@@ -1,17 +1,17 @@
 import { defineStore } from "pinia"
-import { ref } from "vue"
+import { Ref, ref } from "vue"
 
 export const useLoadingStore = defineStore('loading', () => {
 
-    const isLoading = ref(false)    // 是否正在加载
-    const requesetCount = ref(0)    // 请求计数器
-    const minShowTime = 0           // 最小显示时间，单位毫秒
-    let showTime = 0                // 开始显示的时间戳
+    const isLoading = ref<boolean>(false)    // 是否正在加载
+    const requesetCount = ref<number>(0)    // 请求计数器
+    const minShowTime: number = 0           // 最小显示时间，单位毫秒
+    let showTime: number = 0                // 开始显示的时间戳
 
-    const getIsLoading = () => {
+    const getIsLoading = (): boolean => {
         return isLoading.value
     }
-    const show = () => {
+    const show = (): void => {
         requesetCount.value++
         // 如果是第一个请求，记录开始时间并显示loading
         if (requesetCount.value === 1) {
@@ -20,7 +20,7 @@ export const useLoadingStore = defineStore('loading', () => {
         }
         isLoading.value = true
     }
-    const hide = () => {
+    const hide = (): void => {
         if (requesetCount.value <= 0)
             return
         requesetCount.value--

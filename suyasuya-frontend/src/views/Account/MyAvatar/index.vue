@@ -1,6 +1,7 @@
-<script setup>
-import SecurityRightTitle from '@/components/SecurityRightTitle.vue';
-import { useUserStore } from '@/stores/user';
+<script setup lang="ts">
+import SecurityRightTitle from '@/components/SecurityRightTitle.vue'
+import { useUserStore } from '@/stores/user'
+
 
 const userStore = useUserStore()
 
